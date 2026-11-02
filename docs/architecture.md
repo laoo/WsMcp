@@ -98,6 +98,14 @@ rate control.
 - The debugger's windows (CPU, history, memory, I/O, sound) ask through the protocol, as an agent
   would. A frame of the window's own run that stops at a breakpoint or a watchpoint pauses it.
 
+## The page
+
+`web/` is a page on the WebAssembly build: plain modules, a canvas, an AudioWorklet, the keys and
+gamepads as the desktop application has them, and the files it is given kept in IndexedDB
+([0014](decisions/0014-the-page-keeps-its-files-in-indexeddb.md)). It has one thread: it runs the
+frames the clock owes from `requestAnimationFrame`, and answers the control protocol, typed into
+its panel, between them.
+
 ## Save states
 
 Each part writes a tagged chunk (`FOURCC`, version, size), as PetMcp does. A state is a header,

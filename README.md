@@ -45,8 +45,23 @@ With [Emscripten](https://emscripten.org) installed:
 emcmake cmake --preset wasm && cmake --build --preset wasm
 ```
 
-`build/wasm/src/ws_web/wsmcp.js` and `wsmcp.wasm` are an ES module. A page writes the cartridge
-into the module's file system and drives it:
+`build/wasm/web` is then a site of static files: the page in `web/`, with the core beside it.
+Serve it and open it:
+
+```sh
+python3 -m http.server -d build/wasm/web 8000      # then http://localhost:8000
+```
+
+- Open a cartridge with Open cartridge, or drop one on the screen. The boot ROMs are optional;
+  Boot ROMs takes them.
+- The page keeps the cartridges, the boot ROMs, the saves and the states in the browser, and
+  puts the last cartridge in again when it is opened. `?rom=URL` fetches a cartridge instead.
+- The keys are the window's (below), rebound in Keys; gamepads work too. Sound starts at the
+  first click or key.
+- Control protocol takes a request as one line of JSON, and shows the answer.
+
+`wsmcp.js` and `wsmcp.wasm` are an ES module that another page can use too. It writes the
+cartridge into the module's file system and drives it:
 
 ```js
 import createWsMcp from "./wsmcp.js";

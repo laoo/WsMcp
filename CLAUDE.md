@@ -9,7 +9,7 @@ commit messages and identifiers are in English.**
 
 ```sh
 cmake --preset debug && cmake --build --preset debug && ctest --preset debug
-emcmake cmake --preset wasm && cmake --build --preset wasm      # the core for a browser: build/wasm/src/ws_web/wsmcp.{js,wasm}
+emcmake cmake --preset wasm && cmake --build --preset wasm      # the page and the core, build/wasm/web: python3 -m http.server -d build/wasm/web
 ```
 
 Presets: `debug`, `release`, `asan`, `wasm`. Never create build directories by hand;
@@ -59,6 +59,7 @@ An agent drives the emulator with the project skill, `.claude/skills/wsmcp/SKILL
 | `src/ws_cli/` | `wsmcp-cli`: headless runs, `--server`, `--mcp`, `--transcript`, `--batch`. Argument parsing and I/O only. |
 | `src/ws_app/` | `wsmcp`: the SDL3 + Dear ImGui window, its emulation thread, sound, keys and gamepads, and the debugger's windows; `shaders/` and their compiled forms (`scripts/compile-shaders.sh`). |
 | `src/ws_web/` | The WebAssembly binding (embind), built by the `wasm` preset alone. |
+| `web/` | The page on it: HTML, CSS and ES modules, copied into `build/wasm/web` beside `wsmcp.js`. |
 | `tests/` | Catch2 v3 tests, linked against `ws_core`; `control/` also holds the protocol's recorded transcripts. |
 | `.claude/skills/wsmcp/` | The project skill an agent drives the emulator with. |
 | `cmake/` | `Warnings.cmake`, `Dependencies.cmake`, `Version.cmake`, `Install.cmake`. |
