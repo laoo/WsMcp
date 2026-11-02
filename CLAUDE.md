@@ -44,6 +44,15 @@ build/tools/wonderful, and Pillow, which AthenaOS's build needs, into build/tool
 ./scripts/compile-shaders.sh # the screen's shaders, after a change to src/ws_app/shaders (brew install glslang spirv-cross)
 ```
 
+```sh
+./scripts/publish-site.sh             # build the WebAssembly page into build/site, and stop
+./scripts/publish-site.sh --publish   # the same, folded into gh-pages' one commit, force-pushed
+```
+
+The page is `laoo.github.io/WsMcp`, served from the **orphan `gh-pages` branch**, cloned in
+`build/site` and never worked in. Publishing it is the owner's to ask for, as pushing `main` is.
+The branch must never meet `main`: no source on it, no built page on `main`.
+
 Homebrew keeps LLVM keg-only, so `clang-tidy` is not on `PATH` on macOS, and it
 does not know where Apple's SDK keeps the standard library. `scripts/tidy.sh`
 handles both; do not invoke `clang-tidy` directly.

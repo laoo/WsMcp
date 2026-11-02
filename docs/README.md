@@ -61,6 +61,7 @@ it, never "at the end of the session".
 - [0014: The page is plain modules on ws_web, and keeps its files in IndexedDB](decisions/0014-the-page-keeps-its-files-in-indexeddb.md)
 - [0015: The 2003's RTC follows the WSdev wiki, and keeps the machine's time](decisions/0015-the-rtc-follows-the-wsdev-wiki.md)
 - [0016: The WonderWitch's flash follows its datasheet, and is held to AthenaOS's driver](decisions/0016-the-flash-follows-its-datasheet.md)
+- [0017: The WebAssembly page is published on gh-pages, by hand](decisions/0017-the-page-is-published-on-gh-pages-by-hand.md)
 
 ### Hardware
 - [Departures](hardware/departures.md): where the emulated machine departs from Mesen2, and why

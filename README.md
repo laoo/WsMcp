@@ -3,6 +3,9 @@
 WsMcp is an emulator of the Bandai WonderSwan, WonderSwan Color and SwanCrystal, that people and
 AI agents drive alike.
 
+It runs in a browser too, at [laoo.github.io/WsMcp](https://laoo.github.io/WsMcp/): open a
+cartridge of your own, and it stays in your browser.
+
 It is a port of the WonderSwan core of **Mesen2**, by Sour, the most accurate emulator of these
 machines, to a core of its own with the owner's control protocol, which their emulators share,
 around it. An LLM ported it; all credit for understanding the machine goes to Mesen2's authors.

@@ -69,6 +69,14 @@ textarea {
   flex: 1;
 }
 
+a {
+  color: var(--accent);
+}
+
+.source {
+  margin-left: 4px;
+}
+
 button,
 select,
 .button {
