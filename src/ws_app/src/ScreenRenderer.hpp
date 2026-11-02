@@ -13,7 +13,7 @@ namespace ws::app
 
 /// Draws the emulated screen through a preset's shader into a texture the
 /// size it is shown at, in the display's pixels
-/// (docs/decisions/0013-the-desktop-application-is-petmcps.md).
+/// (docs/decisions/0013-the-desktop-application.md).
 class ScreenRenderer
 {
 public:

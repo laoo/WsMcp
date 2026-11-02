@@ -19,7 +19,7 @@ namespace ws::app
 {
 
 /// The host's keyboard and gamepads as the WonderSwan's buttons
-/// (docs/decisions/0013-the-desktop-application-is-petmcps.md). The console is
+/// (docs/decisions/0013-the-desktop-application.md). The console is
 /// held flat or, for a cartridge that asks for it, turned upright, and its
 /// pads turn with it: each way has its own keys, as Mesen2's has, and a
 /// gamepad's directions are turned to match.

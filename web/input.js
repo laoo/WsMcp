@@ -1,5 +1,5 @@
 // The keyboard and the gamepads as the WonderSwan's buttons, as the desktop
-// application has them (docs/decisions/0013-the-desktop-application-is-petmcps.md):
+// application has them (docs/decisions/0013-the-desktop-application.md):
 // a binding for each way the console is held, and a gamepad's directions
 // turned with it. Keys are bound by their place on the keyboard
 // (KeyboardEvent.code), so that WASD is where it is whatever the layout.

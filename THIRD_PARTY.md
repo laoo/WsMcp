@@ -12,7 +12,8 @@ The emulated machine is ported from **Mesen2**, https://github.com/SourMesen/Mes
 License, version 3. Every ported file names the Mesen2 file it ports and the commit it was read
 at, `b9fa69ddc6d0a331fb103fdb5eef6904305703c2`, in its header.
 
-The control protocol, the transports, the batch scripts and the build are the owner's PetMcp's.
+The control protocol, the transports, the batch scripts and the build are the owner's own, shared by
+their emulators.
 
 ## Libraries
 

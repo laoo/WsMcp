@@ -77,8 +77,6 @@ the tests that need one skip without it:
   SwanCrystal), under No-Intro's names.
 - `~/Documents/WS/ROM` — the owner's cartridges; the tests run the public-domain
   ones, `(PD)` in their names.
-- `../PetMcp` — the owner's PET emulator, whose architecture, protocol, style and
-  documentation regime this one takes.
 - https://github.com/wonderfultoolchain/awesome-wsdev — the index of the
   WonderSwan's documentation, test ROMs and tools. The `context-awesome` MCP
   server in `.mcp.json` searches it.

@@ -75,7 +75,7 @@ if( WS_BUILD_APP )
   # Dear ImGui ships no build of its own. FetchContent only unpacks it, and the
   # target below compiles the core and the two backends the application uses:
   # SDL3 for the platform and SDL_GPU for rendering, see
-  # docs/decisions/0008-the-renderer-is-sdl-gpu.md.
+  # docs/decisions/0013-the-desktop-application.md.
   FetchContent_Declare( imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
     GIT_TAG        v1.92.9b-docking

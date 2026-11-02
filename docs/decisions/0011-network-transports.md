@@ -4,7 +4,7 @@
 
 ## Context
 
-PetMcp's transports (its record 0011) are taken unchanged with its server library.
+The transports the owner's emulators share are taken unchanged, with their server library.
 
 ## Decision
 

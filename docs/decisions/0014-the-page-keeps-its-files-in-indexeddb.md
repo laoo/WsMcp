@@ -27,7 +27,7 @@ it is closed, unless it stores them itself.
   other is taken as a boot ROM when it is 4 KB (a WonderSwan's) or 8 KB, or is named like one.
   An 8 KB one is the Color's unless its name says SwanCrystal.
 - **The frontend is the desktop application's**
-  ([0013](0013-the-desktop-application-is-petmcps.md)):
+  ([0013](0013-the-desktop-application.md)):
   - the host's clock paces the frames at 75.47 Hz;
   - an upright cartridge is turned a quarter anticlockwise;
   - the keys are bound for each way the console is held, with Mesen2's defaults, and gamepads are

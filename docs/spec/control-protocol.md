@@ -1,8 +1,8 @@
 # The control protocol
 
 This document specifies how a client controls the emulator: what it sends, and what it gets back.
-Why there is one protocol is [0004](../decisions/0004-one-control-api.md). It is PetMcp's
-protocol, with the WonderSwan's methods.
+Why there is one protocol is [0004](../decisions/0004-one-control-api.md). It is the protocol
+the owner's emulators share, with the WonderSwan's methods.
 
 There is one set of methods (§5). Two protocols carry them:
 

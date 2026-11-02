@@ -29,7 +29,7 @@ namespace ws::app
 {
 
 /// The desktop frontend: an SDL3 window rendered through SDL_GPU, with Dear
-/// ImGui docked over it (docs/decisions/0013-the-desktop-application-is-petmcps.md).
+/// ImGui docked over it (docs/decisions/0013-the-desktop-application.md).
 /// It reaches the emulator only through the dispatcher, as every other client
 /// does.
 class Application

@@ -4,12 +4,12 @@
 
 ## Context
 
-PetMcp's workflow (its records 0013 and 0019) builds and tests on macOS, Linux and Windows, by
-hand or on a version tag, and publishes a release from a tag.
+The owner's emulators share a workflow that builds and tests on macOS, Linux and Windows, by hand
+or on a version tag, and publishes a release from a tag.
 
 ## Decision
 
-`.github/workflows/ci.yml` is PetMcp's, renamed: it runs by hand and on tags `v*`, checks the
+`.github/workflows/ci.yml` is that workflow: it runs by hand and on tags `v*`, checks the
 formatting, builds with warnings as errors (`WS_WERROR`) and runs the suite; the tests that need
 ROMs skip. A tag publishes each platform's package.
 

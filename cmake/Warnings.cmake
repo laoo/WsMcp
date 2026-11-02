@@ -1,5 +1,4 @@
-# Taken from NGA's cmake/Warnings.cmake, unchanged but for the names; the
-# experience its comments cite is NGA's.
+# The owner's standard warning set, shared by their projects but for the names.
 #
 # One place defining the warning set, applied through an interface target.
 add_library( ws_warnings INTERFACE )

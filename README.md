@@ -4,8 +4,8 @@ WsMcp is an emulator of the Bandai WonderSwan, WonderSwan Color and SwanCrystal,
 AI agents drive alike.
 
 It is a port of the WonderSwan core of **Mesen2**, by Sour, the most accurate emulator of these
-machines, to a core of its own with the owner's PetMcp's control protocol around it. An LLM
-ported it; all credit for understanding the machine goes to Mesen2's authors.
+machines, to a core of its own with the owner's control protocol, which their emulators share,
+around it. An LLM ported it; all credit for understanding the machine goes to Mesen2's authors.
 
 - The NEC V30MZ runs with its prefetch queue and wait states, and every cycle steps the PPU a dot
   and the APU a clock, as in Mesen2.

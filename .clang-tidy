@@ -1,6 +1,5 @@
-# Taken from NGA (../../NGA/.clang-tidy): the checks and options below are kept
-# identical to it, so that the owner's projects hold code to one standard. Only
-# the comments that explained NGA's own circumstances were rewritten.
+# The owner's standard checks and options, kept identical across their projects
+# so that all of them hold code to one standard.
 #
 # Naming rules live here rather than in prose: readability-identifier-naming is
 # the only mechanism that actually enforces them.
@@ -43,7 +42,7 @@ Checks: >
 # on libc++ and a class type on MSVC, so the check reads the libc++ type and
 # demands `auto const* const`, which then fails to deduce on MSVC.
 #
-# bugprone-signed-bitwise is listed only to stay identical to NGA. Bit fields of
+# bugprone-signed-bitwise is listed only to stay identical to the standard. Bit fields of
 # the emulated hardware are held in unsigned fixed-width types by convention
 # (see CLAUDE.md), so signed bitwise operations are rare and deliberate here.
 

@@ -1,5 +1,3 @@
-# Taken from NGA's cmake/Version.cmake.
-#
 # The version the binary reports is the tag the build was made from: a release
 # is a tag `vX.Y.Z`, and there is no number in this tree to keep in step with
 # the tags, which is why `project()` carries no `VERSION`. A build with no tag to

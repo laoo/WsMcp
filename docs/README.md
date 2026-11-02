@@ -3,7 +3,7 @@
 This file is the index of every document in the project. **A document that is
 not listed here must not exist.** If a new piece of writing cannot be classified
 into one of the buckets below, that is the signal it should not be written. The
-regime is PetMcp's, adopted whole: [0001](decisions/0001-documentation-regime.md).
+regime is the one the owner's projects share: [0001](decisions/0001-documentation-regime.md).
 
 ## The rule
 
@@ -50,14 +50,14 @@ it, never "at the end of the session".
 - [0003: Licence is GPL-3.0](decisions/0003-licence-gpl-3.md)
 - [0004: One control API](decisions/0004-one-control-api.md)
 - [0005: Ported code is rewritten, tooling is fetched](decisions/0005-dependencies.md)
-- [0006: Code style and toolchain are PetMcp's](decisions/0006-code-style-is-petmcps.md)
+- [0006: Code style and toolchain are the owner's](decisions/0006-code-style-is-the-owners.md)
 - [0007: The machine's parts are Mesen2's, and System stands for its console](decisions/0007-the-parts-are-mesen2s.md)
 - [0008: The machine is stepped by the CPU's bus cycles](decisions/0008-stepped-by-the-cpus-cycles.md)
 - [0009: The boot ROMs are the owner's dumps; without one the cartridge starts where the IPL leaves it](decisions/0009-boot-roms-are-the-owners.md)
 - [0010: The core compiles to WebAssembly](decisions/0010-the-core-compiles-to-webassembly.md)
 - [0011: MCP over HTTP is served by cpp-httplib, JSON-lines over TCP by sockets of our own](decisions/0011-network-transports.md)
 - [0012: CI builds three platforms when asked, and a tag makes a release](decisions/0012-ci-runs-when-asked.md)
-- [0013: The desktop application is PetMcp's, with the WonderSwan held either way](decisions/0013-the-desktop-application-is-petmcps.md)
+- [0013: The desktop application is SDL3 and Dear ImGui on SDL_GPU, with the WonderSwan held either way](decisions/0013-the-desktop-application.md)
 - [0014: The page is plain modules on ws_web, and keeps its files in IndexedDB](decisions/0014-the-page-keeps-its-files-in-indexeddb.md)
 
 ### Hardware

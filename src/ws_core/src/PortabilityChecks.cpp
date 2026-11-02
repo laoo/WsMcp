@@ -1,8 +1,8 @@
 // WsMcp targets C++23 across Apple clang, GCC and MSVC, but only the subset all
 // three implement. These assertions fail the build the moment someone reaches
 // for a feature that is missing on one of the three platforms, instead of
-// letting CI discover it later. Taken from NGA, which found the hard way where
-// the three disagree.
+// letting CI discover it later. The owner's projects share them; they were
+// found the hard way where the three disagree.
 
 #include <array>
 #include <bit>

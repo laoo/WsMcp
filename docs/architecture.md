@@ -74,8 +74,8 @@ binding's `handle`.
 
 ## The desktop frontend
 
-`wsmcp` is SDL3 with Dear ImGui (docking), PetMcp's frontend
-([0013](decisions/0013-the-desktop-application-is-petmcps.md)).
+`wsmcp` is SDL3 with Dear ImGui (docking), the frontend the owner's emulators share
+([0013](decisions/0013-the-desktop-application.md)).
 
 **Threads:**
 
@@ -87,8 +87,8 @@ binding's `handle`.
   watches what an agent does on `--server` or `--mcp-http`.
 
 **Pacing:** the host's monotonic clock paces the emulation at 75.47 frames a second, whatever the
-display's refresh rate. The sound goes to an SDL audio stream at 24 kHz, with PetMcp's dynamic
-rate control.
+display's refresh rate. The sound goes to an SDL audio stream at 24 kHz, with dynamic rate
+control.
 
 **Buttons and screen:**
 
@@ -108,7 +108,7 @@ its panel, between them.
 
 ## Save states
 
-Each part writes a tagged chunk (`FOURCC`, version, size), as PetMcp does. A state is a header,
+Each part writes a tagged chunk (`FOURCC`, version, size). A state is a header,
 which names the layout's version, the model and the cartridge's CRC-32, the machine's own chunk
 and the parts' chunks, then the memories. The pictures are not kept: the next frame redraws them.
 

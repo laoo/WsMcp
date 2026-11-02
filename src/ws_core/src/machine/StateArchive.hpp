@@ -1,6 +1,6 @@
 #pragma once
 
-// The two directions of a save state, as PGMEmu has them. Each part of the
+// The two directions of a save state. Each part of the
 // machine names its state once, in a serialize() that takes either archive:
 // the writer copies each field out, the reader copies it back in, in the same
 // order. Fields are copied as their bytes, so only trivially copyable ones are

@@ -15,7 +15,7 @@ terms.
 
 ## Consequences
 
-- The owner's PetMcp is GPL-2.0-only; code cannot move from WsMcp into it. Code may move from
-  PetMcp into WsMcp, as the infrastructure did.
+- Code cannot move from WsMcp into the owner's projects that are GPL-2.0-only. Code may move
+  from them into WsMcp, as the infrastructure did.
 - Every library linked must be compatible with GPL-3.0; the ones fetched are MIT, BSD, zlib,
   Boost and the like.

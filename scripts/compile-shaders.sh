@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Compiles the desktop application's screen shaders, src/ws_app/shaders/*.vert
 # and *.frag, into the bytecode and source SDL_GPU takes on each platform:
-# SPIR-V for Vulkan, MSL for Metal (docs/decisions/0013-the-desktop-application-is-petmcps.md).
+# SPIR-V for Vulkan, MSL for Metal (docs/decisions/0013-the-desktop-application.md).
 # The results go into src/ws_app/shaders/compiled/ as C array initialisers,
 # which are committed: building the application needs neither tool.
 #

@@ -22,6 +22,6 @@ cycle the CPU makes, a memory or port access, an idle cycle or a prefetch, calls
 
 ## Consequences
 
-- There is one clock and no catch-up, as in PetMcp.
+- There is one clock and no catch-up.
 - A REP string instruction runs an iteration per `execOpCode`, as in Mesen2, so interrupts are
   taken between iterations; the history and breakpoints see it once, at its first iteration.

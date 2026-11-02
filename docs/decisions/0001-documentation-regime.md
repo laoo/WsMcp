@@ -6,13 +6,11 @@
 
 This project is written largely by AI agent sessions. Left alone, such sessions append to
 whatever document looks plausible, restate signatures that rot on the first refactor, and leave
-status files that duplicate git. The owner's PetMcp, which took the regime from PGMEmu and NGA,
-solved this.
+status files that duplicate git. The owner's projects share a regime that answers this.
 
 ## Decision
 
-PetMcp's regime is adopted whole, as written in
-`../PetMcp/docs/decisions/0001-documentation-regime.md` and its `docs/README.md`:
+The owner's regime is adopted whole:
 
 - Every document answers exactly one question and has an explicit prohibition. The buckets are
   listed in [docs/README.md](../README.md), and a document must be indexed there before it may
