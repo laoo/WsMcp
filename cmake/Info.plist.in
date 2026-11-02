@@ -27,6 +27,6 @@
   <key>NSHighResolutionCapable</key>
   <true/>
   <key>NSHumanReadableCopyright</key>
-  <string>GNU General Public License, version 2</string>
+  <string>GNU General Public License, version 3</string>
 </dict>
 </plist>

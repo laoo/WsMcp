@@ -57,6 +57,7 @@ it, never "at the end of the session".
 - [0010: The core compiles to WebAssembly](decisions/0010-the-core-compiles-to-webassembly.md)
 - [0011: MCP over HTTP is served by cpp-httplib, JSON-lines over TCP by sockets of our own](decisions/0011-network-transports.md)
 - [0012: CI builds three platforms when asked, and a tag makes a release](decisions/0012-ci-runs-when-asked.md)
+- [0013: The desktop application is PetMcp's, with the WonderSwan held either way](decisions/0013-the-desktop-application-is-petmcps.md)
 
 ### Hardware
 - [Departures](hardware/departures.md): where the emulated machine departs from Mesen2, and why

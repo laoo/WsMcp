@@ -14,12 +14,14 @@ emcmake cmake --preset wasm && cmake --build --preset wasm      # the core for a
 
 Presets: `debug`, `release`, `asan`, `wasm`. Never create build directories by hand;
 the presets own `build/<preset>`. The test presets run tests in parallel on
-every core. The desktop application (`-DWS_BUILD_APP=ON`) is not built yet
-([docs/plans/queue.md](docs/plans/queue.md)).
+every core. The desktop application, `build/<preset>/src/ws_app/wsmcp`, is built by
+default; `-DWS_BUILD_APP=OFF` leaves SDL3 and ImGui out. A build directory configured before it was
+the default keeps `OFF` in its cache: configure it again with `-DWS_BUILD_APP=ON`.
 
 ```sh
 build/debug/src/ws_cli/wsmcp-cli --server tcp:7701 --bios-dir ~/Documents/WS/BIOS --save-dir build/saves   # JSON lines on TCP
 build/debug/src/ws_cli/wsmcp-cli --mcp --bios-dir ~/Documents/WS/BIOS "game.wsc"                              # MCP for an agent
+build/debug/src/ws_app/wsmcp --server tcp:7701 --mcp-http 7702 "game.wsc"                                      # the window, served to agents
 ctest --preset debug -L control                     # the protocol's recorded transcripts, tests/control/*.jsonl
 ctest --preset debug -L regression                  # the batch scripts, tests/regression/*.json, against their golden sums
 (cd tests && ../build/debug/src/ws_cli/wsmcp-cli --transcript control/lines.jsonl > control/lines.expect)   # re-record one, after a deliberate change of answers
@@ -38,6 +40,7 @@ the Wonderful toolchain, which builds ws-test-suite, into build/tools/wonderful.
 ./scripts/format.sh          # format in place
 ./scripts/format.sh --check  # fail on deviation
 ./scripts/tidy.sh            # clang-tidy against build/debug
+./scripts/compile-shaders.sh # the screen's shaders, after a change to src/ws_app/shaders (brew install glslang spirv-cross)
 ```
 
 Homebrew keeps LLVM keg-only, so `clang-tidy` is not on `PATH` on macOS, and it
@@ -54,6 +57,7 @@ An agent drives the emulator with the project skill, `.claude/skills/wsmcp/SKILL
 | `src/ws_core/src/machine/`, `src/ws_core/src/cpu/` | The parts, ported from Mesen2's `Core/WS`, one class per Mesen2 part. |
 | `src/ws_server/` | Transports onto the dispatcher: JSON-lines (stdio, TCP) and MCP. |
 | `src/ws_cli/` | `wsmcp-cli`: headless runs, `--server`, `--mcp`, `--transcript`, `--batch`. Argument parsing and I/O only. |
+| `src/ws_app/` | `wsmcp`: the SDL3 + Dear ImGui window, its emulation thread, sound, keys and gamepads, and the debugger's windows; `shaders/` and their compiled forms (`scripts/compile-shaders.sh`). |
 | `src/ws_web/` | The WebAssembly binding (embind), built by the `wasm` preset alone. |
 | `tests/` | Catch2 v3 tests, linked against `ws_core`; `control/` also holds the protocol's recorded transcripts. |
 | `.claude/skills/wsmcp/` | The project skill an agent drives the emulator with. |

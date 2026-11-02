@@ -63,7 +63,42 @@ ws.handle('{"id":1,"method":"cpu.get_state"}');   // the control protocol
 
 ## Running
 
-`wsmcp-cli` has no window. It runs only on request, and prints its options with `--help`.
+There are two programs. Both print their options with `--help`.
+
+### The window: `wsmcp`
+
+```sh
+wsmcp
+wsmcp --bios-dir ~/Documents/WS/BIOS game.wsc
+wsmcp --server tcp:7701 --mcp-http 7702 game.wsc     # and serve it to other programs and agents
+```
+
+- A cartridge given after the options, opened with File > Open cartridge or dropped on the window
+  is put in and powered up. File > Open recent remembers the last eight.
+- File > Choose boot ROM directory sets the boot ROMs' folder, and the window remembers it.
+- The cartridges' saves and the save states are kept beside the window's settings, unless
+  `--save-dir` and `--state-dir` say otherwise. Emulation > Save state and Load state keep one
+  state for each cartridge.
+- Emulation > Model puts the cartridge in a WonderSwan, a Color or a SwanCrystal; otherwise it
+  chooses.
+- A game held upright is shown upright, and its keys turn with it (Display > Turn upright games
+  upright).
+
+The keys, while the screen has the focus, rebound in View > Input:
+
+| Button | Held flat | Held upright |
+|---|---|---|
+| X1-X4 (up, right, down, left) | the arrows | A, W, D, S |
+| Y1-Y4 | W, D, S, A | Left, Up, Right, Down |
+| A, B | X, Z | Z, X |
+| Start, Sound | Return, Q | Return, Q |
+
+A gamepad's pad and left stick are the X pad when flat and the Y pad when upright, its directions
+turned with the console.
+
+### Headless: `wsmcp-cli`
+
+`wsmcp-cli` has no window. It runs only on request.
 
 ```sh
 wsmcp-cli --server tcp:7701 --bios-dir ~/Documents/WS/BIOS --save-dir saves game.wsc   # JSON lines on TCP
@@ -84,8 +119,9 @@ There is one set of methods, specified in
 [docs/spec/control-protocol.md](docs/spec/control-protocol.md). It is available in two ways:
 
 - **JSON lines**, on stdio or TCP. Each request is one line of JSON. Each answer is one line.
-- **MCP** (Model Context Protocol) on stdio. Each method is an MCP tool, so an AI agent can use
-  the emulator directly. Screenshots come back as images.
+- **MCP** (Model Context Protocol), on stdio from `wsmcp-cli --mcp` and on HTTP from
+  `wsmcp --mcp-http PORT`. Each method is an MCP tool, so an AI agent can use the emulator
+  directly, on the machine the window shows. Screenshots come back as images.
 
 ```sh
 printf '%s\n' '{"id":1,"method":"emu.run_frames","params":{"count":600}}' | nc -w 5 127.0.0.1 7701

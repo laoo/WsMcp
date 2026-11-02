@@ -17,7 +17,7 @@ set( CMAKE_CXX_EXTENSIONS        OFF )
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
 option( WS_BUILD_TESTS "Build the test suite"                     ON )
-option( WS_BUILD_APP   "Build the SDL3 desktop application"       OFF )
+option( WS_BUILD_APP   "Build the SDL3 desktop application"       ON )
 option( WS_WERROR      "Treat compiler warnings as errors"        OFF )
 
 include( Warnings )

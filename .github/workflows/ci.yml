@@ -5,8 +5,7 @@ name: CI
 # suite and packages what a release would hold; a tag v* also publishes those
 # packages as a GitHub release. The tests that need ROMs, and the regression
 # suite, skip here: no ROM is ever part of the repository.
-# docs/decisions/0013-ci-and-releases.md and 0019-ci-runs-when-asked.md say why
-# it is laid out this way.
+# docs/decisions/0012-ci-runs-when-asked.md says why it is laid out this way.
 
 on:
   push:

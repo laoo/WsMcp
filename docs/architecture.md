@@ -72,6 +72,32 @@ in groups: `emu.*` (status, power, runs), `cart.*`, `memory.*`, `io.*`, `cpu.*`,
 capability of its own: JSON-lines on stdio and TCP, MCP on stdio and HTTP, and the WebAssembly
 binding's `handle`.
 
+## The desktop frontend
+
+`wsmcp` is SDL3 with Dear ImGui (docking), PetMcp's frontend
+([0013](decisions/0013-the-desktop-application-is-petmcps.md)).
+
+**Threads:**
+
+- The core runs on its own emulation thread (`EmulationThread`). It runs frames at the
+  WonderSwan's pace, and between two frames it answers the requests queued for it. It hands each
+  finished picture over under a lock, and its sound straight to the audio stream.
+- The GUI thread never touches the core. It takes pictures and sends requests to the dispatcher
+  through the queue, the same path the network transports use. So the person at the window
+  watches what an agent does on `--server` or `--mcp-http`.
+
+**Pacing:** the host's monotonic clock paces the emulation at 75.47 frames a second, whatever the
+display's refresh rate. The sound goes to an SDL audio stream at 24 kHz, with PetMcp's dynamic
+rate control.
+
+**Buttons and screen:**
+
+- The buttons come from the keyboard, while the screen window has the focus, and from gamepads.
+  They are held beside the buttons the protocol holds (`setHostButtons`).
+- An upright cartridge's picture is turned a quarter, and the keys and the pads turn with it.
+- The debugger's windows (CPU, history, memory, I/O, sound) ask through the protocol, as an agent
+  would. A frame of the window's own run that stops at a breakpoint or a watchpoint pauses it.
+
 ## Save states
 
 Each part writes a tagged chunk (`FOURCC`, version, size), as PetMcp does. A state is a header,
