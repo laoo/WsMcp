@@ -116,6 +116,10 @@ private:
   /// The picture as the emulator drew it, and as shown.
   Picture mPicture;
   std::vector<std::uint8_t> mFrame;
+  /// The picture shown, its red, green and blue unrounded: what the LCD keeps
+  /// of the pictures before fades by less than a level a frame when ghosting
+  /// is high, and would never fade at all in whole levels.
+  std::vector<float> mGhost;
   std::uint32_t mFrameWidth{ machine::SCREEN_WIDTH };
   std::uint32_t mFrameHeight{ machine::SCREEN_HEIGHT };
   bool mFrameChanged{ true };

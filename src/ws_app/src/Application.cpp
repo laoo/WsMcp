@@ -385,10 +385,11 @@ void Application::present()
   std::uint32_t const width = upright ? mPicture.height : mPicture.width;
   std::uint32_t const height = upright ? mPicture.width : mPicture.height;
   std::size_t const bytes = std::size_t{ width } * height * 4;
-  bool const sameSize = width == mFrameWidth && height == mFrameHeight && mFrame.size() == bytes;
+  bool const sameSize = width == mFrameWidth && height == mFrameHeight && mGhost.size() == bytes;
   if ( !sameSize )
   {
     mFrame.assign( bytes, 0 );
+    mGhost.assign( bytes, 0.0F );
     mFrameWidth = width;
     mFrameHeight = height;
     mScreen = std::make_unique<GpuTexture>( mDevice, width, height );
@@ -406,9 +407,9 @@ void Application::present()
       for ( std::size_t channel = 0; channel < 3; ++channel )
       {
         float const now = mPicture.rgba[from + channel];
-        float const before = mFrame[to + channel];
-        mFrame[to + channel] =
-            static_cast<std::uint8_t>( std::lround( ( now * ( 1.0F - keep ) ) + ( before * keep ) ) );
+        float& shown = mGhost[to + channel];
+        shown = ( now * ( 1.0F - keep ) ) + ( shown * keep );
+        mFrame[to + channel] = static_cast<std::uint8_t>( std::lround( shown ) );
       }
       mFrame[to + 3] = 0xff;
     }
@@ -712,19 +713,19 @@ void Application::drawDisplayMenu()
   }
   changed |= ImGui::MenuItem( "Whole multiples only", nullptr, &mDisplay.integerScale );
   // A slider changes the picture as it is dragged, and is kept when let go.
-  auto const slider = [&changed]( char const* label, float& value )
+  auto const slider = [&changed]( char const* label, float& value, float most )
   {
     ImGui::PushID( "setting" );
-    ImGui::SliderFloat( label, &value, 0.0F, 1.0F );
+    ImGui::SliderFloat( label, &value, 0.0F, most, "%.3f", ImGuiSliderFlags_AlwaysClamp );
     changed |= ImGui::IsItemDeactivatedAfterEdit();
     ImGui::PopID();
   };
   ImGui::Separator();
   if ( mDisplay.preset == DisplaySettings::Preset::LCD )
   {
-    slider( "Grid", mDisplay.grid );
+    slider( "Grid", mDisplay.grid, 1.0F );
   }
-  slider( "Ghosting", mDisplay.ghosting );
+  slider( "Ghosting", mDisplay.ghosting, MAX_GHOSTING );
   if ( changed && !mDisplayPath.empty() )
   {
     saveDisplaySettings( mDisplay, mDisplayPath );

@@ -72,7 +72,7 @@ DisplaySettings loadDisplaySettings( std::filesystem::path const& path )
   settings.integerScale = json.value( "integer_scale", settings.integerScale );
   settings.turnUpright = json.value( "turn_upright", settings.turnUpright );
   settings.grid = fraction( json, "grid", settings.grid );
-  settings.ghosting = fraction( json, "ghosting", settings.ghosting );
+  settings.ghosting = std::min( fraction( json, "ghosting", settings.ghosting ), MAX_GHOSTING );
   return settings;
 }
 
