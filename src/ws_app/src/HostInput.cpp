@@ -63,14 +63,20 @@ Directions stickOf( SDL_Gamepad* pad, SDL_GamepadAxis xAxis, SDL_GamepadAxis yAx
            .left = x < -STICK_THRESHOLD };
 }
 
+/// `button`'s bit when `held`, none otherwise.
+constexpr std::uint16_t bitIf( bool held, Button button )
+{
+  return held ? bitOf( button ) : std::uint16_t{ 0 };
+}
+
 /// `directions` as the four buttons of a pad, `up` to `left` in turn.
 std::uint16_t padOf( Directions directions, std::array<Button, 4> const& pad )
 {
   std::uint16_t mask = 0;
-  mask |= directions.up ? bitOf( pad[0] ) : 0U;
-  mask |= directions.right ? bitOf( pad[1] ) : 0U;
-  mask |= directions.down ? bitOf( pad[2] ) : 0U;
-  mask |= directions.left ? bitOf( pad[3] ) : 0U;
+  mask |= bitIf( directions.up, pad[0] );
+  mask |= bitIf( directions.right, pad[1] );
+  mask |= bitIf( directions.down, pad[2] );
+  mask |= bitIf( directions.left, pad[3] );
   return mask;
 }
 
@@ -90,14 +96,14 @@ std::uint16_t buttonsOf( SDL_Gamepad* pad, HostInput::Way way )
   Directions const right = stickOf( pad, SDL_GAMEPAD_AXIS_RIGHTX, SDL_GAMEPAD_AXIS_RIGHTY );
 
   std::uint16_t mask = 0;
-  mask |= pressed( SDL_GAMEPAD_BUTTON_START ) ? bitOf( Button::START ) : 0U;
-  mask |= pressed( SDL_GAMEPAD_BUTTON_BACK ) ? bitOf( Button::SOUND ) : 0U;
+  mask |= bitIf( pressed( SDL_GAMEPAD_BUTTON_START ), Button::START );
+  mask |= bitIf( pressed( SDL_GAMEPAD_BUTTON_BACK ), Button::SOUND );
   if ( way == HostInput::Way::FLAT )
   {
     mask |= padOf( leftOrPad, { Button::UP, Button::RIGHT, Button::DOWN, Button::LEFT } );
     mask |= padOf( right, { Button::UP2, Button::RIGHT2, Button::DOWN2, Button::LEFT2 } );
-    mask |= pressed( SDL_GAMEPAD_BUTTON_EAST ) ? bitOf( Button::A ) : 0U;
-    mask |= pressed( SDL_GAMEPAD_BUTTON_SOUTH ) ? bitOf( Button::B ) : 0U;
+    mask |= bitIf( pressed( SDL_GAMEPAD_BUTTON_EAST ), Button::A );
+    mask |= bitIf( pressed( SDL_GAMEPAD_BUTTON_SOUTH ), Button::B );
     return mask;
   }
   std::array<Button, 4> const xTurned{ Button::RIGHT, Button::DOWN, Button::LEFT, Button::UP };
@@ -108,8 +114,8 @@ std::uint16_t buttonsOf( SDL_Gamepad* pad, HostInput::Way way )
   mask |= padOf( leftOrPad, { Button::RIGHT2, Button::DOWN2, Button::LEFT2, Button::UP2 } );
   mask |= padOf( face, xTurned );
   mask |= padOf( right, xTurned );
-  mask |= pressed( SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER ) ? bitOf( Button::A ) : 0U;
-  mask |= pressed( SDL_GAMEPAD_BUTTON_LEFT_SHOULDER ) ? bitOf( Button::B ) : 0U;
+  mask |= bitIf( pressed( SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER ), Button::A );
+  mask |= bitIf( pressed( SDL_GAMEPAD_BUTTON_LEFT_SHOULDER ), Button::B );
   return mask;
 }
 
