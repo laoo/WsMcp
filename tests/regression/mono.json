@@ -1,0 +1,45 @@
+{
+  "description": "The WonderSwan's IPL, then a monochrome cartridge drawing its text.",
+  "boot_rom": true,
+  "steps": [
+    {
+      "method": "cart.load",
+      "params": {
+        "path": "Hello World by Sir Dragoon (PD).ws",
+        "model": "ws"
+      }
+    },
+    {
+      "method": "emu.run_frames",
+      "params": {
+        "count": 150
+      }
+    },
+    {
+      "checkpoint": "splash"
+    },
+    {
+      "method": "emu.run_frames",
+      "params": {
+        "count": 450
+      }
+    },
+    {
+      "checkpoint": "hello"
+    }
+  ],
+  "golden": {
+    "splash": {
+      "frame": 150,
+      "picture": "ae176fe4",
+      "work_ram": "c3b6519e",
+      "sound": "4abbe41a"
+    },
+    "hello": {
+      "frame": 600,
+      "picture": "d3bf752d",
+      "work_ram": "bc2cf7ba",
+      "sound": "04e65ca4"
+    }
+  }
+}

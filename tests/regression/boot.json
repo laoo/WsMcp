@@ -1,0 +1,44 @@
+{
+  "description": "The WonderSwan Color's IPL: its splash, then the hand-over to Swandriving's road.",
+  "boot_rom": true,
+  "steps": [
+    {
+      "method": "cart.load",
+      "params": {
+        "path": "Swandriving (PD).wsc"
+      }
+    },
+    {
+      "method": "emu.run_frames",
+      "params": {
+        "count": 150
+      }
+    },
+    {
+      "checkpoint": "splash"
+    },
+    {
+      "method": "emu.run_frames",
+      "params": {
+        "count": 450
+      }
+    },
+    {
+      "checkpoint": "road"
+    }
+  ],
+  "golden": {
+    "splash": {
+      "frame": 150,
+      "picture": "abf349b0",
+      "work_ram": "a6605d33",
+      "sound": "a6490b93"
+    },
+    "road": {
+      "frame": 600,
+      "picture": "db5d53b5",
+      "work_ram": "2626c872",
+      "sound": "04e65ca4"
+    }
+  }
+}

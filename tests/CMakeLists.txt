@@ -52,8 +52,12 @@ endforeach()
 # The regression suite: every script in regression/ run by wsmcp-cli --batch,
 # which checks it against the golden sums it holds (docs/spec/batch.md). A
 # script whose boot ROM or cartridge is not there exits 77, which CTest counts
-# as skipped.
-file( GLOB regression_scripts CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/regression/*.json" )
+# as skipped. They run in the cartridges' directory, which they name their
+# cartridges in; without it there is nothing to run.
+set( regression_scripts )
+if( EXISTS "${WS_TEST_ROM_DIR}" )
+  file( GLOB regression_scripts CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/regression/*.json" )
+endif()
 foreach( script IN LISTS regression_scripts )
   get_filename_component( name "${script}" NAME_WE )
   add_test( NAME "regression.${name}"

@@ -1,0 +1,97 @@
+{
+  "description": "Swandriving started without the IPL, driven: the road scrolls, the car steers, the engine sounds.",
+  "steps": [
+    {
+      "method": "cart.load",
+      "params": {
+        "path": "Swandriving (PD).wsc"
+      }
+    },
+    {
+      "method": "emu.run_frames",
+      "params": {
+        "count": 300
+      }
+    },
+    {
+      "checkpoint": "start"
+    },
+    {
+      "method": "input.hold",
+      "params": {
+        "buttons": [
+          "a",
+          "x2"
+        ]
+      }
+    },
+    {
+      "method": "emu.run_frames",
+      "params": {
+        "count": 120
+      }
+    },
+    {
+      "checkpoint": "driving"
+    },
+    {
+      "method": "input.clear"
+    },
+    {
+      "method": "state.save",
+      "params": {
+        "filename": "/tmp/wsmcp-regression-driving.wsstate"
+      }
+    },
+    {
+      "method": "emu.run_frames",
+      "params": {
+        "count": 60
+      }
+    },
+    {
+      "checkpoint": "coasting"
+    },
+    {
+      "method": "state.load",
+      "params": {
+        "filename": "/tmp/wsmcp-regression-driving.wsstate"
+      }
+    },
+    {
+      "method": "emu.run_frames",
+      "params": {
+        "count": 60
+      }
+    },
+    {
+      "checkpoint": "coasting-again"
+    }
+  ],
+  "golden": {
+    "start": {
+      "frame": 300,
+      "picture": "a2053151",
+      "work_ram": "0ec9162c",
+      "sound": "ff8b4ff9"
+    },
+    "driving": {
+      "frame": 420,
+      "picture": "cc452c38",
+      "work_ram": "f9cba0cb",
+      "sound": "bffc86a7"
+    },
+    "coasting": {
+      "frame": 480,
+      "picture": "cc452c38",
+      "work_ram": "f9cba0cb",
+      "sound": "54aeb720"
+    },
+    "coasting-again": {
+      "frame": 480,
+      "picture": "cc452c38",
+      "work_ram": "f9cba0cb",
+      "sound": "54aeb720"
+    }
+  }
+}
