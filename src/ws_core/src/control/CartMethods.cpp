@@ -48,6 +48,7 @@ Json cartJson( Emulator const& emulator, machine::Machine const& machine )
   info["cart_eeprom_size"] = machine.memory( machine::Memory::CART_EEPROM ).size();
   info["internal_eeprom_size"] = machine.memory( machine::Memory::INTERNAL_EEPROM ).size();
   info["rtc"] = machine.hasRtc();
+  info["flash"] = machine.hasFlash();
   info["boot_rom"] = emulator.bootRomUsed();
   if ( emulator.bootRomUsed() )
   {
@@ -107,8 +108,8 @@ void addCartMethods( Dispatcher& dispatcher, Emulator& emulator )
       info( "The cartridge the machine runs: its path, the model running it, what its header says (publisher, game "
             "id and version, colour support, whether it is held vertically, the checksum and whether the ROM sums "
             "to it, the 16 bytes whole), its ROM's size and CRC-32, the sizes of its SRAM, its EEPROM and the "
-            "console's EEPROM, whether it has a real-time clock (a Bandai 2003's), and whether the boot ROM ran, "
-            "with its CRC-32." ),
+            "console's EEPROM, whether it has a real-time clock (a Bandai 2003's) and a flash chip (a "
+            "WonderWitch's), and whether the boot ROM ran, with its CRC-32." ),
       [&emulator]( Json const& /*params*/ ) -> Outcome
       {
         auto const machine = machineOf( emulator );
@@ -121,9 +122,9 @@ void addCartMethods( Dispatcher& dispatcher, Emulator& emulator )
 
   dispatcher.add(
       "cart.save",
-      info( "Writes the cartridge's SRAM or EEPROM, its real-time clock, and the console's EEPROM, to the "
-            "save directory now, as a power-up and the emulator's end do. Nothing is written without a save "
-            "directory." ),
+      info( "Writes the cartridge's SRAM or EEPROM, its real-time clock, its flash once written, and the "
+            "console's EEPROM, to the save directory now, as a power-up and the emulator's end do. Nothing is "
+            "written without a save directory." ),
       [&emulator]( Json const& /*params*/ ) -> Outcome
       {
         auto const machine = machineOf( emulator );

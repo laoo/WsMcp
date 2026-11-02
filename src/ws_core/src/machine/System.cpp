@@ -110,7 +110,7 @@ System::System( Config const& config,
   mDmaController = std::make_unique<DmaController>( *this );
   mPpu = std::make_unique<Ppu>( *this );
   mApu = std::make_unique<Apu>( *this );
-  mCart = std::make_unique<Cart>( *this, info.mapper == 1 );
+  mCart = std::make_unique<Cart>( *this, info.mapper == 1, info.mapper == 1 && mPrgRom.size() == Flash::SIZE );
 
   mMemoryManager->init();
 
@@ -411,7 +411,7 @@ void System::serialize( Archive& archive )
   archive.chunk( fourCc( "PPU " ), 1, *mPpu );
   archive.chunk( fourCc( "APU " ), 1, *mApu );
   // Process cart before memory manager to ensure mappings are updated properly
-  archive.chunk( fourCc( "CART" ), 2, *mCart );
+  archive.chunk( fourCc( "CART" ), 3, *mCart );
   archive.chunk( fourCc( "MEMM" ), 1, *mMemoryManager );
   archive.chunk( fourCc( "DMA " ), 1, *mDmaController );
   archive.chunk( fourCc( "CTRL" ), 1, *mControlManager );
@@ -442,6 +442,11 @@ void System::serialize( Archive& archive )
   keep( mSaveRam );
   keep( mInternalEepromData );
   keep( mCartEepromData );
+  // A flash chip's contents are the cartridge's to change.
+  if ( mCart->getFlash() != nullptr )
+  {
+    keep( mPrgRom );
+  }
 }
 
 template void System::serialize( StateWriter& archive );

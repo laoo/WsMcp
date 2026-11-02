@@ -106,6 +106,8 @@ private:
   /// The cartridge's clock: its registers, then the host's time when they
   /// were written, seconds since 1970, 8 bytes little-endian.
   [[nodiscard]] std::filesystem::path rtcPath() const;
+  /// A WonderWitch's flash, once it has been written: the whole chip.
+  [[nodiscard]] std::filesystem::path flashPath() const;
   [[nodiscard]] std::filesystem::path internalEepromPath( machine::Model model ) const;
 
   Settings mSettings;

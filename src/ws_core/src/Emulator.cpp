@@ -172,6 +172,11 @@ std::filesystem::path Emulator::rtcPath() const
   return mSettings.saveDirectory / mRunningCartridge.filename().replace_extension( ".rtc" );
 }
 
+std::filesystem::path Emulator::flashPath() const
+{
+  return mSettings.saveDirectory / mRunningCartridge.filename().replace_extension( ".flash" );
+}
+
 std::filesystem::path Emulator::internalEepromPath( machine::Model model ) const
 {
   return mSettings.saveDirectory / ( std::string{ modelName( model ) } + ".ieeprom" );
@@ -215,6 +220,7 @@ std::expected<void, std::string> Emulator::powerUp()
                         .save = {},
                         .rtc = {},
                         .rtcSecondsAway = 0,
+                        .flash = {},
                         .audioMode = mSettings.audioMode,
                         .lcdShowIcons = mSettings.lcdShowIcons };
   if ( mSettings.useBootRom )
@@ -242,6 +248,12 @@ std::expected<void, std::string> Emulator::powerUp()
     if ( auto eeprom = readFile( internalEepromPath( model ), 0x800 ) )
     {
       setup.internalEeprom = std::move( *eeprom );
+    }
+    // A flash chip written before is as it was left; a file of another
+    // size is not this cartridge's, and is left out.
+    if ( auto flash = readFile( flashPath(), MAX_ROM_SIZE ) )
+    {
+      setup.flash = std::move( *flash );
     }
     // The clock ran on its battery while the emulator was off.
     if ( auto clock = readFile( rtcPath(), RTC_FILE_SIZE ); clock && clock->size() == RTC_FILE_SIZE )
@@ -282,6 +294,14 @@ std::expected<void, std::string> Emulator::flushSaves()
       {
         return written;
       }
+    }
+  }
+  if ( mMachine->flashWritten() )
+  {
+    if ( auto const written = writeFile( flashPath(), std::as_const( *mMachine ).memory( machine::Memory::ROM ) );
+         !written )
+    {
+      return written;
     }
   }
   if ( mMachine->hasRtc() )

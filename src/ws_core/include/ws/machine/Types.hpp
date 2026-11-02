@@ -534,6 +534,50 @@ struct RtcState
   std::uint8_t index{};
 };
 
+/// What the WonderWitch's flash chip, a Fujitsu MBM29DL400TC, is doing.
+enum class FlashMode : std::uint8_t
+{
+  /// Reads give its contents.
+  READ,
+  /// Reads give its manufacturer's and device's codes.
+  AUTOSELECT,
+  /// Fast Mode: a byte is programmed by two writes, without the unlock.
+  FAST,
+  /// A byte is being programmed.
+  PROGRAM,
+  /// Sectors, or the whole chip, are being erased.
+  ERASE
+};
+
+struct FlashState
+{
+  FlashMode mode{ FlashMode::READ };
+  /// The unlock writes seen, $AA then $55, of the three a command takes.
+  std::uint8_t unlock{};
+  /// The command written takes another write: $A0 the byte to program, $80
+  /// the erase, $90 in Fast Mode its reset.
+  bool programSetup{};
+  bool eraseSetup{};
+  bool fastResetSetup{};
+  /// Whether a byte programmed in Fast Mode goes back to it.
+  bool fast{};
+  /// The byte being programmed: where, and what was written.
+  std::uint32_t address{};
+  std::uint8_t data{};
+  /// The sectors being erased, a bit each, and whether the whole chip is.
+  std::uint16_t sectors{};
+  bool chip{};
+  /// The master clock until which more sectors may be added to an erase,
+  /// and at which the program or the erase is done.
+  std::uint64_t timeoutEnd{};
+  std::uint64_t end{};
+  /// DQ6 and DQ2, which toggle with each read while it works.
+  bool toggle{};
+  bool eraseToggle{};
+  /// Whether anything has been programmed or erased since power-up.
+  bool written{};
+};
+
 struct CartState
 {
   /// $C0-$C3, and on the 2003 the high bits $CF-$D5 add: the 1 MB bank at
@@ -545,6 +589,7 @@ struct CartState
   /// The 2003's $CE: the ROM, not the SRAM, at $10000-$1FFFF.
   bool flashSelected{};
   RtcState rtc{};
+  FlashState flash{};
 };
 
 /// Every part's state at once, as the debugger shows it.

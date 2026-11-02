@@ -3,6 +3,8 @@
 #include "Eeprom.hpp"
 #include "MemoryManager.hpp"
 
+#include <utility>
+
 namespace ws::machine
 {
 
@@ -19,13 +21,17 @@ std::uint16_t withLow( std::uint16_t bank, std::uint8_t low )
 
 } // namespace
 
-Cart::Cart( System& system, bool bandai2003 ) : mSystem{ &system }
+Cart::Cart( System& system, bool bandai2003, bool flash ) : mSystem{ &system }
 {
   mState.selectedBanks = { 0xFF, 0xFF, 0xFF, 0xFF };
   if ( bandai2003 )
   {
     mRtc.emplace( system, mState.rtc );
     mRtc->powerOn();
+  }
+  if ( flash )
+  {
+    mFlash.emplace( system, mState.flash );
   }
 }
 
@@ -39,11 +45,51 @@ Rtc* Cart::getRtc()
   return mRtc ? &*mRtc : nullptr;
 }
 
+Flash* Cart::getFlash()
+{
+  return mFlash ? &*mFlash : nullptr;
+}
+
+std::uint32_t Cart::romOffset( std::uint32_t address ) const
+{
+  auto const& banks = mState.selectedBanks;
+  switch ( address >> 16U )
+  {
+  case 0x1:
+    return ( banks[1] * 0x10000U ) | ( address & 0xFFFFU );
+  case 0x2:
+    return ( banks[2] * 0x10000U ) | ( address & 0xFFFFU );
+  case 0x3:
+    return ( banks[3] * 0x10000U ) | ( address & 0xFFFFU );
+  default:
+    return ( banks[0] * 0x100000U ) | ( address & 0xFFFFFU );
+  }
+}
+
+std::uint8_t Cart::readFlash( std::uint32_t address )
+{
+  return mFlash ? mFlash->read( romOffset( address ) ) : mSystem->getMemoryManager()->getUnmappedPort();
+}
+
+void Cart::writeFlash( std::uint32_t address, std::uint8_t value )
+{
+  if ( mFlash )
+  {
+    mFlash->write( romOffset( address ), value );
+  }
+}
+
+std::uint8_t Cart::peekFlash( std::uint32_t address ) const
+{
+  std::span<std::uint8_t const> const rom = std::as_const( *mSystem ).getMemory( MemoryType::PRG_ROM );
+  return rom.empty() ? 0 : rom[romOffset( address ) % rom.size()];
+}
+
 void Cart::refreshMappings()
 {
   MemoryManager* const memoryManager = mSystem->getMemoryManager();
-  // The 2003 can put the ROM, a flash chip on some cartridges, where the
-  // SRAM is, to be written; a mask ROM takes no write.
+  // The 2003 can put the ROM where the SRAM is, to be written; a mask ROM
+  // takes no write, a flash chip takes them as its commands.
   if ( mState.flashSelected )
   {
     memoryManager->map( 0x10000, 0x1FFFF, MemoryType::PRG_ROM, mState.selectedBanks[1] * 0x10000U, true );
@@ -55,6 +101,25 @@ void Cart::refreshMappings()
   memoryManager->map( 0x20000, 0x2FFFF, MemoryType::PRG_ROM, mState.selectedBanks[2] * 0x10000U, true );
   memoryManager->map( 0x30000, 0x3FFFF, MemoryType::PRG_ROM, mState.selectedBanks[3] * 0x10000U, true );
   memoryManager->map( 0x40000, 0xFFFFF, MemoryType::PRG_ROM, ( mState.selectedBanks[0] * 0x100000U ) + 0x40000U, true );
+  if ( !mFlash )
+  {
+    return;
+  }
+  // While the chip answers commands rather than its contents, every read of
+  // the ROM asks it.
+  if ( !mFlash->readsArray() )
+  {
+    memoryManager->unmap( 0x20000, 0xFFFFF );
+    memoryManager->mapToFlash( 0x20000, 0xFFFFF, true, false );
+  }
+  if ( mState.flashSelected )
+  {
+    if ( !mFlash->readsArray() )
+    {
+      memoryManager->unmap( 0x10000, 0x1FFFF );
+    }
+    memoryManager->mapToFlash( 0x10000, 0x1FFFF, !mFlash->readsArray(), true );
+  }
 }
 
 std::uint8_t Cart::readPort( std::uint16_t port )
@@ -191,6 +256,10 @@ void Cart::run()
   if ( mRtc )
   {
     mRtc->run();
+  }
+  if ( mFlash )
+  {
+    mFlash->run();
   }
 }
 

@@ -59,6 +59,10 @@ banks' high bits at `$CF`-`$D5`, after the WSdev wiki
 passes. The S-3511A's interrupt is sampled when its ports are used and once a frame, so the
 frequency mode, up to 32 kHz on the hardware, is seen at most once a frame.
 
+A WonderWitch's flash chip, which Mesen2 has none of, follows its datasheet
+([0016](../decisions/0016-the-flash-follows-its-datasheet.md)), with its typical times; sector
+protection and Erase Suspend are not emulated.
+
 ## The colours
 
 The picture is converted to RGBA as Mesen2's default video filter does with its frontend's

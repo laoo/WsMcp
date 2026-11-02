@@ -57,6 +57,8 @@ void MemoryManager::map( std::uint32_t start, std::uint32_t end, MemoryType type
     std::uint8_t* const src = memory.data() + offset;
     mReads[i >> 12U] = src;
     mWrites[i >> 12U] = readonly ? nullptr : src;
+    mFlashReads[i >> 12U] = false;
+    mFlashWrites[i >> 12U] = false;
 
     offset += 0x1000;
     if ( offset >= size )
@@ -72,7 +74,28 @@ void MemoryManager::unmap( std::uint32_t start, std::uint32_t end )
   {
     mReads[i >> 12U] = nullptr;
     mWrites[i >> 12U] = nullptr;
+    mFlashReads[i >> 12U] = false;
+    mFlashWrites[i >> 12U] = false;
   }
+}
+
+void MemoryManager::mapToFlash( std::uint32_t start, std::uint32_t end, bool reads, bool writes )
+{
+  for ( std::uint32_t i = start; i < end; i += 0x1000 )
+  {
+    mFlashReads[i >> 12U] = reads;
+    mFlashWrites[i >> 12U] = writes;
+  }
+}
+
+std::uint8_t MemoryManager::readFlash( std::uint32_t addr ) const
+{
+  return mSystem->getCart()->readFlash( addr );
+}
+
+void MemoryManager::writeFlash( std::uint32_t addr, std::uint8_t value )
+{
+  mSystem->getCart()->writeFlash( addr, value );
 }
 
 std::uint8_t MemoryManager::debugRead( std::uint32_t addr ) const
@@ -81,6 +104,12 @@ std::uint8_t MemoryManager::debugRead( std::uint32_t addr ) const
   if ( handler != nullptr )
   {
     return handler[addr & 0xFFFU];
+  }
+  if ( mFlashReads[( addr >> 12U ) & 0xFFU] )
+  {
+    // The chip's contents, not its status: a debugger's read asks nothing
+    // of it.
+    return mSystem->getCart()->peekFlash( addr );
   }
   return 0;
 }

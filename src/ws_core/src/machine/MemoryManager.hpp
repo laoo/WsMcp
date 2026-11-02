@@ -43,6 +43,9 @@ public:
 
   void map( std::uint32_t start, std::uint32_t end, MemoryType type, std::uint32_t offset, bool readonly );
   void unmap( std::uint32_t start, std::uint32_t end );
+  /// Sends the reads, the writes or both of [start, end], where no memory is
+  /// mapped, to the cartridge's flash chip. map() and unmap() undo it.
+  void mapToFlash( std::uint32_t start, std::uint32_t end, bool reads, bool writes );
 
   /// A cycle of the bus: the CPU's clock, a PPU dot, an APU clock.
   void exec()
@@ -60,6 +63,10 @@ public:
     {
       value = handler[addr & 0xFFFU];
     }
+    else if ( mFlashReads[( addr >> 12U ) & 0xFFU] )
+    {
+      value = readFlash( addr );
+    }
     return value;
   }
 
@@ -69,6 +76,10 @@ public:
     if ( handler != nullptr )
     {
       handler[addr & 0xFFFU] = value;
+    }
+    else if ( mFlashWrites[( addr >> 12U ) & 0xFFU] )
+    {
+      writeFlash( addr, value );
     }
   }
 
@@ -204,6 +215,11 @@ private:
 
   std::array<std::uint8_t*, 256> mReads{};
   std::array<std::uint8_t*, 256> mWrites{};
+  std::array<bool, 256> mFlashReads{};
+  std::array<bool, 256> mFlashWrites{};
+
+  [[nodiscard]] std::uint8_t readFlash( std::uint32_t addr ) const;
+  void writeFlash( std::uint32_t addr, std::uint8_t value );
 };
 
 } // namespace ws::machine

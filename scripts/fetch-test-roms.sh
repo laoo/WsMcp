@@ -12,7 +12,10 @@
 # rather than the /opt/wonderful its guide asks for, so that no root is
 # needed: its package manager places itself where it is, and its Lua tools'
 # first lines are pointed there. It needs GNU make 4 (brew install make on
-# macOS, whose make is 3.81). Downloads are checked against their SHA-256.
+# macOS, whose make is 3.81). The flash test of tests/roms/flash is built with
+# it for AthenaOS, the open FreyaOS, which is built too: its fonts take Python's
+# Pillow, installed into a virtual environment in build/tools/venv. Downloads
+# are checked against their SHA-256.
 # Kept free of bash-4 features: macOS ships bash 3.2.
 set -euo pipefail
 root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
@@ -91,10 +94,46 @@ wstestsuite() {
     "$make" -C "$dir" -j4 >"$dir/build.log" 2>&1 || { cat "$dir/build.log" >&2; exit 1; }
 }
 
+# AthenaOS at a commit, built with the toolchain above.
+athenaos() {
+  local commit="$1"
+  local dir="$target/src/AthenaOS"
+  local make=make venv="$root/build/tools/venv"
+  command -v gmake >/dev/null && make=gmake
+  if [[ ! -d "$dir/.git" ]]; then
+    git clone -q https://github.com/OpenWitch/AthenaOS.git "$dir"
+  fi
+  git -C "$dir" -c advice.detachedHead=false checkout -q "$commit"
+  git -C "$dir" submodule update -q --init
+  if [[ ! -x "$venv/bin/python" ]]; then
+    python3 -m venv "$venv"
+  fi
+  "$venv/bin/python" -c "import PIL" 2>/dev/null || "$venv/bin/pip" install -q pillow
+  WONDERFUL_TOOLCHAIN="$root/build/tools/wonderful" PATH="$venv/bin:$root/build/tools/wonderful/bin:$PATH" \
+    "$make" -C "$dir" -j4 >"$dir/build.log" 2>&1 || { cat "$dir/build.log" >&2; exit 1; }
+}
+
+# tests/roms/flash as a FreyaOS program, on a 512 KB WonderWitch cartridge
+# with AthenaOS: build/tools/testroms/flash/flashtest.ws.
+flashtest() {
+  local dir="$target/flash" athena="$target/src/AthenaOS"
+  local make=make
+  command -v gmake >/dev/null && make=gmake
+  mkdir -p "$dir"
+  WONDERFUL_TOOLCHAIN="$root/build/tools/wonderful" PATH="$root/build/tools/wonderful/bin:$PATH" \
+    "$make" -C "$root/tests/roms/flash" BUILDDIR="$dir/build" ELF="$dir/build/flashtest.elf" \
+    MAP="$dir/build/flashtest.map" EXECUTABLE="$dir/flashtest.fx" "$dir/flashtest.fx" >"$dir/build.log" 2>&1 ||
+    { cat "$dir/build.log" >&2; exit 1; }
+  python3 "$athena/tools/build_rom.py" -s 512 "$dir/flashtest.ws" "$athena"/dist/AthenaBIOS-*.raw \
+    "$athena"/dist/AthenaOS-*.raw "$dir/flashtest.fx" >/dev/null
+}
+
 release FluBBaOfWard/WSCPUTest v0.7.1 WSCpuTest.zip d15b36ac5a36c8a44c458e5e262a41585751494f67b3c42c223fb81effeb06a4
 assembled FluBBaOfWard/WSHWTest 34e33d5bfaaabb8b09fa5a557e409efe9fbfd979 WSHWTest.asm WSHWTest.wsc
 assembled FluBBaOfWard/WSTimingTest 025e606fc3b6615160ffdae485d992ffcad0c024 timingtest.asm timingtest.ws
 wonderful
 wstestsuite 7dfa0e2e869d08386b685d6a56df0bcfaf181b47
+athenaos d37beae7482616313883dcfa4bdb7114d1ef5749
+flashtest
 
 echo "test ROMs in $target"

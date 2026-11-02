@@ -35,6 +35,10 @@ struct Setup
   /// 2003 cartridge has a clock.
   std::vector<std::uint8_t> rtc;
   std::uint64_t rtcSecondsAway{};
+  /// A WonderWitch's flash as it was saved, which takes the place of `rom`'s
+  /// contents; empty for them as given. Only a Bandai 2003 cartridge of
+  /// 512 KB has a flash chip.
+  std::vector<std::uint8_t> flash;
   AudioMode audioMode{ AudioMode::HEADPHONES };
   /// Whether the picture carries the LCD's icons beside or below it.
   bool lcdShowIcons{};
@@ -238,6 +242,11 @@ public:
   /// What the clock's battery keeps, to be given back as Setup::rtc; empty
   /// without a clock.
   [[nodiscard]] std::vector<std::uint8_t> rtc() const;
+  /// Whether the cartridge's ROM is a flash chip, and whether it has been
+  /// programmed or erased since power-up: its contents, memory(Memory::ROM),
+  /// are then to be kept, and given back as Setup::flash.
+  [[nodiscard]] bool hasFlash() const;
+  [[nodiscard]] bool flashWritten() const;
 
   /// The buttons the protocol holds, Button bits.
   void setButtons( std::uint16_t buttons );

@@ -15,12 +15,13 @@ at, `b9fa69ddc6d0a331fb103fdb5eef6904305703c2`, in its header.
 The control protocol, the transports, the batch scripts and the build are the owner's own, shared by
 their emulators.
 
-## The Bandai 2003's RTC: ares
+## The Bandai 2003 and the WonderWitch's flash: ares
 
 Where the WSdev wiki is silent, the Bandai 2003's ports and the S-3511A's calendar and interrupts
 follow **ares**, https://github.com/ares-emulator/ares, at
-`4307bf2eff6e4f9a277fdc6f9d4f4de177b3f932` (`ares/ws/cartridge/rtc.cpp` and `io.cpp`), released
-under this licence:
+`4307bf2eff6e4f9a277fdc6f9d4f4de177b3f932` (`ares/ws/cartridge/rtc.cpp` and `io.cpp`), and so
+does what the WonderWitch's flash gives in Fast Mode (`flash.cpp`). ares is released under this
+licence:
 
 > Copyright (c) 2004-2025 ares team, Near et al
 >
@@ -56,8 +57,10 @@ Used by the test suite alone, and not distributed: [Catch2](https://github.com/c
 [WSHWTest](https://github.com/FluBBaOfWard/WSHWTest) and
 [WSTimingTest](https://github.com/FluBBaOfWard/WSTimingTest), and Adrian Siekierka's (asie)
 [ws-test-suite](https://github.com/asiekierka/ws-test-suite) (MIT), built with his
-[Wonderful toolchain](https://wonderful.asie.pl), all fetched, assembled or built by
-`scripts/fetch-test-roms.sh`.
+[Wonderful toolchain](https://wonderful.asie.pl), and OpenWitch's
+[AthenaOS](https://github.com/OpenWitch/AthenaOS) (MIT), which runs `tests/roms/flash`, all
+fetched, assembled or built by `scripts/fetch-test-roms.sh`. `tests/roms/flash/Makefile` is the
+Wonderful toolchain's WonderWitch template (CC0-1.0).
 
 ## What is not here
 

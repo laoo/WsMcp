@@ -12,15 +12,17 @@
 #include <fstream>
 #include <map>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
 
 // The hardware test ROMs scripts/fetch-test-roms.sh puts in
 // build/tools/testroms: FluBBaOfWard's WSCpuTest, WSHWTest and WSTimingTest,
-// each made on and passing on the hardware. They run with the owner's boot
-// ROMs, as on the hardware, and skip without the ROMs. What the emulator
-// still does otherwise is docs/hardware/departures.md.
+// and asiekierka's ws-test-suite, each made on and passing on the hardware;
+// and tests/roms/flash on AthenaOS, whose flash driver runs on it. They run
+// with the owner's boot ROMs, as on the hardware, and skip without the ROMs.
+// What the emulator still does otherwise is docs/hardware/departures.md.
 
 namespace
 {
@@ -393,6 +395,25 @@ TEST_CASE( "ws-test-suite's tests pass", "[test-roms]" )
     REQUIRE( marks.failed == 0 );
     REQUIRE( marks.passed == program.passed );
   }
+}
+
+TEST_CASE( "AthenaOS's driver writes and erases the WonderWitch's flash", "[test-roms]" )
+{
+  // tests/roms/flash, run by AthenaOS from the cartridge's own flash,
+  // programs its verdict into the sector it tests: "PASS" and a bit for each
+  // step that held, at $18000.
+  auto const emulator = running( testRom( "flash/flashtest.ws" ), Model::COLOR );
+  if ( !emulator )
+  {
+    SKIP( "the flash test or the boot ROMs are not there: scripts/fetch-test-roms.sh" );
+  }
+  Machine& machine = *emulator->machine();
+  REQUIRE( machine.hasFlash() );
+  machine.runFrames( 900 );
+  std::span<std::uint8_t const> const verdict = machine.memory( ws::machine::Memory::ROM ).subspan( 0x18000, 5 );
+  REQUIRE( std::string{ verdict.begin(), verdict.begin() + 4 } == "PASS" );
+  REQUIRE( verdict[4] == 0x07 );
+  REQUIRE( machine.flashWritten() );
 }
 
 TEST_CASE( "ws-test-suite's display tests draw PASS", "[test-roms]" )

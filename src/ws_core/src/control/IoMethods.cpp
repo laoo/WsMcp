@@ -192,6 +192,19 @@ Json eepromJson( machine::EepromState const& eeprom )
 
 /// The 2003's own ports and its RTC: the S-3511A's registers and where the
 /// command running stands.
+Json flashJson( machine::FlashState const& flash )
+{
+  static constexpr std::array<char const*, 5> MODES{ "read", "autoselect", "fast", "program", "erase" };
+  return Json{ { "mode", MODES.at( static_cast<std::size_t>( flash.mode ) ) },
+               { "unlock", flash.unlock },
+               { "address", flash.address },
+               { "data", flash.data },
+               { "sectors", flash.sectors },
+               { "chip", flash.chip },
+               { "end", flash.end },
+               { "written", flash.written } };
+}
+
 Json bandai2003Json( machine::CartState const& cart )
 {
   machine::RtcState const& rtc = cart.rtc;
@@ -209,7 +222,7 @@ Json bandai2003Json( machine::CartState const& cart )
                    { "payload_index", rtc.index } } } };
 }
 
-Json stateJson( machine::State const& state, bool bandai2003 )
+Json stateJson( machine::State const& state, bool bandai2003, bool flash )
 {
   machine::MemoryManagerState const& memory = state.memoryManager;
   machine::DmaControllerState const& dma = state.dmaController;
@@ -275,6 +288,10 @@ Json stateJson( machine::State const& state, bool bandai2003 )
   if ( bandai2003 )
   {
     json["cart"]["bandai2003"] = bandai2003Json( state.cart );
+  }
+  if ( flash )
+  {
+    json["cart"]["flash"] = flashJson( state.cart.flash );
   }
   return json;
 }
@@ -364,7 +381,7 @@ void addIoMethods( Dispatcher& dispatcher, Emulator& emulator )
         {
           return std::unexpected( machine.error() );
         }
-        return stateJson( ( *machine )->state(), ( *machine )->hasRtc() );
+        return stateJson( ( *machine )->state(), ( *machine )->hasRtc(), ( *machine )->hasFlash() );
       } );
 }
 

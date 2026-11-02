@@ -79,6 +79,13 @@ struct Machine::Impl final : SystemListener, BusObserver
     {
       rtc->restore( setup.rtc, setup.rtcSecondsAway );
     }
+    // A flash chip's contents as they were saved; the CRC above stays the
+    // cartridge's as given, which states are told apart by.
+    if ( std::span<std::uint8_t> const rom = system->getMemory( MemoryType::PRG_ROM );
+         system->getCart()->getFlash() != nullptr && setup.flash.size() == rom.size() )
+    {
+      std::ranges::copy( setup.flash, rom.begin() );
+    }
 
     // The battery-backed memory as it was saved, as much of it as fits.
     for ( MemoryType const type : { MemoryType::CART_RAM, MemoryType::CART_EEPROM } )
@@ -555,6 +562,16 @@ bool Machine::vertical() const
 std::uint32_t Machine::romCrc() const
 {
   return mImpl->romCrc;
+}
+
+bool Machine::hasFlash() const
+{
+  return mImpl->system->getCart()->getFlash() != nullptr;
+}
+
+bool Machine::flashWritten() const
+{
+  return hasFlash() && mImpl->system->getCart()->getState().flash.written;
 }
 
 bool Machine::hasRtc() const

@@ -28,13 +28,14 @@ ctest --preset debug -L regression                  # the batch scripts, tests/r
 ```
 
 ```sh
-./scripts/fetch-test-roms.sh                        # the hardware test ROMs, into build/tools/testroms (brew install nasm make)
-build/release/tests/ws_tests "[test-roms]"          # them all: ws-test-suite, WSHWTest, WSTimingTest, and WSCpuTest, about 9 minutes
+./scripts/fetch-test-roms.sh                        # the hardware test ROMs and the flash test, into build/tools/testroms (brew install nasm make)
+build/release/tests/ws_tests "[test-roms]"          # them all: ws-test-suite, the flash test, WSHWTest, WSTimingTest, and WSCpuTest, about 9 minutes
 ```
 
 The [test-roms] tests skip without the test ROMs or the boot ROMs; WSCpuTest's,
 tagged [cpu-test] as well, is hidden from the default run. The script installs
-the Wonderful toolchain, which builds ws-test-suite, into build/tools/wonderful.
+the Wonderful toolchain, which builds ws-test-suite, AthenaOS and `tests/roms/flash`, into
+build/tools/wonderful, and Pillow, which AthenaOS's build needs, into build/tools/venv.
 
 ```sh
 ./scripts/format.sh          # format in place
@@ -60,7 +61,7 @@ An agent drives the emulator with the project skill, `.claude/skills/wsmcp/SKILL
 | `src/ws_app/` | `wsmcp`: the SDL3 + Dear ImGui window, its emulation thread, sound, keys and gamepads, and the debugger's windows; `shaders/` and their compiled forms (`scripts/compile-shaders.sh`). |
 | `src/ws_web/` | The WebAssembly binding (embind), built by the `wasm` preset alone. |
 | `web/` | The page on it: HTML, CSS and ES modules, copied into `build/wasm/web` beside `wsmcp.js`. |
-| `tests/` | Catch2 v3 tests, linked against `ws_core`; `control/` also holds the protocol's recorded transcripts. |
+| `tests/` | Catch2 v3 tests, linked against `ws_core`; `control/` also holds the protocol's recorded transcripts, `roms/` the sources of test ROMs of our own. |
 | `.claude/skills/wsmcp/` | The project skill an agent drives the emulator with. |
 | `cmake/` | `Warnings.cmake`, `Dependencies.cmake`, `Version.cmake`, `Install.cmake`. |
 | `docs/` | See `docs/README.md`; it is the index and the rulebook. |

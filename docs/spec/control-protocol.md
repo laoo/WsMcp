@@ -314,7 +314,7 @@ Errors: `not_found`, `load_failed`, `bad_request`.
 Takes no parameters.
 
 ```json
-{"id":2,"ok":true,"result":{"path":"game.wsc","model":"wsc","publisher":1,"game_id":20,"color_support":true,"vertical":false,"rom_size":4194304,"rom_crc32":"0f1e2d3c","game_version":0,"checksum":40128,"checksum_ok":true,"header_hex":"ea00c000f00001011400030441000cb0","save_ram_size":32768,"cart_eeprom_size":0,"internal_eeprom_size":2048,"rtc":false,"boot_rom":true,"boot_rom_crc32":"..."}}
+{"id":2,"ok":true,"result":{"path":"game.wsc","model":"wsc","publisher":1,"game_id":20,"color_support":true,"vertical":false,"rom_size":4194304,"rom_crc32":"0f1e2d3c","game_version":0,"checksum":40128,"checksum_ok":true,"header_hex":"ea00c000f00001011400030441000cb0","save_ram_size":32768,"cart_eeprom_size":0,"internal_eeprom_size":2048,"rtc":false,"flash":false,"boot_rom":true,"boot_rom_crc32":"..."}}
 ```
 
 | Field | Meaning |
@@ -327,6 +327,7 @@ Takes no parameters.
 | `header_hex` | The header whole: the last 16 bytes of the ROM. |
 | `save_ram_size`, `cart_eeprom_size`, `internal_eeprom_size` | The cartridge's SRAM and EEPROM (0 for none) and the console's EEPROM, in bytes. |
 | `rtc` | Whether the cartridge has a real-time clock: whether its header names the Bandai 2003 mapper. |
+| `flash` | Whether its ROM is a WonderWitch's flash chip: a Bandai 2003 cartridge of 512 KB. |
 | `boot_rom`, `boot_rom_crc32` | Whether the boot ROM ran, and when it did, its CRC-32. |
 
 Errors: `no_machine`.
@@ -339,7 +340,8 @@ directory now, as a power-up and the emulator's end do: the cartridge's as its f
 written as its file name with `.rtc`: the S-3511A's ten registers (the date and time, the
 configuration, the alarm), then the host's time, seconds since 1970, eight bytes little-endian.
 At the next power-up the clock runs on by the time since then; without the file it starts as a
-new battery leaves it. Answers
+new battery leaves it. A WonderWitch's flash, once programmed or erased, is written whole as the
+file name with `.flash`, and the next power-up reads it in place of the ROM. Answers
 `{"written", "save_directory"}`; without a save directory nothing is written.
 
 Errors: `no_machine`, `save_failed`.
@@ -483,7 +485,7 @@ PPU latches for the line it draws is `{"value", "latch"}`.
 | `keypad` | `input_select`, the rows `$B5` selects. |
 | `serial` | `enabled`, `baud` (9600 or 38400), the send and receive buffers and flags. |
 | `internal_eeprom` | The console's EEPROM: `size`, the command, control and buffers, its flags. |
-| `cart` | `banks`, the four bank registers, `$C0`-`$C3` with, on the 2003, the high bits of `$CF`-`$D5`; `eeprom`, as `internal_eeprom`, `size` `none` without one. On a Bandai 2003, `bandai2003`: `gpo_enable` and `gpo_data` (`$CC`, `$CD`), `flash_selected` (`$CE`), and `rtc`, the S-3511A's `date_time` (seven BCD bytes: year, month, day, day of the week, hour with bit 7 PM, minute, second), `config` and `alarm`, and the command running: `control` as `$CA` reads, `data` as `$CB` holds, `phase` (`idle`, `command`, `payload`, `wait_write`, `wait_read`) and `payload_index`. |
+| `cart` | `banks`, the four bank registers, `$C0`-`$C3` with, on the 2003, the high bits of `$CF`-`$D5`; `eeprom`, as `internal_eeprom`, `size` `none` without one. On a Bandai 2003, `bandai2003`: `gpo_enable` and `gpo_data` (`$CC`, `$CD`), `flash_selected` (`$CE`), and `rtc`, the S-3511A's `date_time` (seven BCD bytes: year, month, day, day of the week, hour with bit 7 PM, minute, second), `config` and `alarm`, and the command running: `control` as `$CA` reads, `data` as `$CB` holds, `phase` (`idle`, `command`, `payload`, `wait_write`, `wait_read`) and `payload_index`. With a flash chip, `flash`: its `mode` (`read`, `autoselect`, `fast`, `program`, `erase`), the `unlock` writes seen, the byte being programmed (`address`, `data`), the `sectors` being erased (a bit each) or the whole `chip`, the cycle the operation `end`s at, and whether it has been `written` since power-up. |
 
 Errors: `no_machine`.
 
@@ -687,7 +689,7 @@ directory (`--state-dir`, or the working directory). `state.list` answers the `.
 there, `{"states":["a.wsstate"]}`; `state.save` adds no extension of its own.
 
 A state holds everything a run changes: every part's registers, work RAM, the cartridge's SRAM
-and EEPROM, its clock, and the console's EEPROM. It holds none of the ROMs, the breakpoints, the
+and EEPROM, its clock and its flash, and the console's EEPROM. It holds none of the ROMs, the breakpoints, the
 watchpoints, the trace or the last complete picture, and the buttons held stay as they are. It is read back by the
 build that wrote it, into a machine of the same model with the same cartridge; any other is
 refused with `state_mismatch`, and the machine runs on as it was. Loading a state, then running,

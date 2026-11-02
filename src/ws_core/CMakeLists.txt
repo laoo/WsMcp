@@ -25,6 +25,7 @@ add_library( ws_core
   src/machine/ControlManager.cpp
   src/machine/DmaController.cpp
   src/machine/Eeprom.cpp
+  src/machine/Flash.cpp
   src/machine/Machine.cpp
   src/machine/MemoryManager.cpp
   src/machine/Picture.cpp

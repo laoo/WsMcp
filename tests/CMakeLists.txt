@@ -3,6 +3,7 @@ add_executable( ws_tests
   control/DispatcherTest.cpp
   cpu/CpuTest.cpp
   machine/ApuTest.cpp
+  machine/FlashTest.cpp
   machine/MachineTest.cpp
   machine/PpuTest.cpp
   machine/RtcTest.cpp
