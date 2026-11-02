@@ -1,5 +1,6 @@
 #include "ws/machine/Machine.hpp"
 
+#include "Cart.hpp"
 #include "ControlManager.hpp"
 #include "MemoryManager.hpp"
 #include "Picture.hpp"
@@ -74,6 +75,10 @@ struct Machine::Impl final : SystemListener, BusObserver
     std::vector<std::uint8_t> const save = std::move( setup.save );
     system = std::make_unique<System>(
         config, std::move( setup.rom ), std::move( setup.bootRom ), std::move( setup.internalEeprom ), *this );
+    if ( Rtc* const rtc = system->getCart()->getRtc(); rtc != nullptr && !setup.rtc.empty() )
+    {
+      rtc->restore( setup.rtc, setup.rtcSecondsAway );
+    }
 
     // The battery-backed memory as it was saved, as much of it as fits.
     for ( MemoryType const type : { MemoryType::CART_RAM, MemoryType::CART_EEPROM } )
@@ -550,6 +555,22 @@ bool Machine::vertical() const
 std::uint32_t Machine::romCrc() const
 {
   return mImpl->romCrc;
+}
+
+bool Machine::hasRtc() const
+{
+  return mImpl->system->getCart()->getRtc() != nullptr;
+}
+
+std::vector<std::uint8_t> Machine::rtc() const
+{
+  Rtc const* const rtc = mImpl->system->getCart()->getRtc();
+  if ( rtc == nullptr )
+  {
+    return {};
+  }
+  auto const registers = rtc->registers();
+  return { registers.begin(), registers.end() };
 }
 
 std::uint32_t Machine::bootRomCrc() const

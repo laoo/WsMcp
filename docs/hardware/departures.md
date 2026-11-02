@@ -50,6 +50,15 @@ differ by 1 either way, as the hardware's do from run to run. Where the port dif
 `tests/machine/TestRomsTest.cpp` holds the emulator to the hardware's values within 1, and to
 the values above where it departs, so that any change shows.
 
+## The Bandai 2003
+
+Mesen2 ports the 2001's and the 2003's banks at `$C0`-`$C3` and nothing more of the 2003. The
+port adds its RTC at `$CA`-`$CB`, its outputs at `$CC`-`$CD`, the ROM's window at `$CE` and the
+banks' high bits at `$CF`-`$D5`, after the WSdev wiki
+([0015](../decisions/0015-the-rtc-follows-the-wsdev-wiki.md)); ws-test-suite's `rtc/mapper`
+passes. The S-3511A's interrupt is sampled when its ports are used and once a frame, so the
+frequency mode, up to 32 kHz on the hardware, is seen at most once a frame.
+
 ## The colours
 
 The picture is converted to RGBA as Mesen2's default video filter does with its frontend's

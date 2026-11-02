@@ -29,6 +29,12 @@ struct Setup
   std::vector<std::uint8_t> internalEeprom;
   /// The cartridge's SRAM or EEPROM as it was saved; empty for a blank one.
   std::vector<std::uint8_t> save;
+  /// The cartridge's real-time clock as Machine::rtc() gave it when it was
+  /// saved, and the seconds since: the clock runs on by them, as on its
+  /// battery. Empty for a clock whose battery was just put in. Only a Bandai
+  /// 2003 cartridge has a clock.
+  std::vector<std::uint8_t> rtc;
+  std::uint64_t rtcSecondsAway{};
   AudioMode audioMode{ AudioMode::HEADPHONES };
   /// Whether the picture carries the LCD's icons beside or below it.
   bool lcdShowIcons{};
@@ -227,6 +233,11 @@ public:
   /// The CRC-32 of the cartridge's ROM as given and of the boot ROM.
   [[nodiscard]] std::uint32_t romCrc() const;
   [[nodiscard]] std::uint32_t bootRomCrc() const;
+  /// Whether the cartridge has a real-time clock: a Bandai 2003's.
+  [[nodiscard]] bool hasRtc() const;
+  /// What the clock's battery keeps, to be given back as Setup::rtc; empty
+  /// without a clock.
+  [[nodiscard]] std::vector<std::uint8_t> rtc() const;
 
   /// The buttons the protocol holds, Button bits.
   void setButtons( std::uint16_t buttons );

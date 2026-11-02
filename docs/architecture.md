@@ -62,7 +62,9 @@ for. The boot ROM runs where there is one; otherwise the cartridge starts where 
 leave it ([0009](decisions/0009-boot-roms-are-the-owners.md)).
 
 The cartridge's SRAM or EEPROM, and the console's EEPROM, are kept in the save directory between
-runs, written when the machine is powered off, replaced or the emulator ends.
+runs, written when the machine is powered off, replaced or the emulator ends. So is a Bandai 2003
+cartridge's real-time clock, which counts the machine's seconds while it runs and the host's
+while it is off ([0015](decisions/0015-the-rtc-follows-the-wsdev-wiki.md)).
 
 ## The control API
 
@@ -128,6 +130,7 @@ default: some 500,000 instructions, 48 bytes each.
    instruction's results and flags; WSHWTest, the interrupt controller, the timers, the I/O
    registers, the noise and the sweep; WSTimingTest, every instruction's cycles against the
    hardware's; asiekierka's ws-test-suite, the CPU's quirks and interrupt timing, the display,
-   the EEPROMs, the DMAs and the sound ([hardware/departures.md](hardware/departures.md)).
+   the EEPROMs, the DMAs, the sound and the Bandai 2003's RTC
+   ([hardware/departures.md](hardware/departures.md)).
 4. **Transcripts and batch scripts:** scripted runs whose pictures, memory and sound are summed
    at checkpoints, to catch regressions.

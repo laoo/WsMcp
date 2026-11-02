@@ -2,7 +2,9 @@
 
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstdio>
 #include <exception>
 #include <fstream>
@@ -20,6 +22,19 @@ namespace
 constexpr std::uintmax_t MIN_ROM_SIZE = 0x10000;
 /// The largest a mapper reaches: 256 banks of 64 KB.
 constexpr std::uintmax_t MAX_ROM_SIZE = 0x1000000;
+
+/// A clock's file: its registers, then the host's time.
+constexpr std::size_t RTC_REGISTERS = 10;
+constexpr std::size_t RTC_FILE_SIZE = RTC_REGISTERS + 8;
+
+/// The host's time, seconds since 1970: what a battery-backed clock follows
+/// while the emulator is off.
+std::uint64_t hostSeconds()
+{
+  auto const since = std::chrono::system_clock::now().time_since_epoch();
+  return static_cast<std::uint64_t>(
+      std::max<std::int64_t>( 0, std::chrono::duration_cast<std::chrono::seconds>( since ).count() ) );
+}
 
 std::expected<std::vector<std::uint8_t>, std::string> readFile( std::filesystem::path const& path,
                                                                 std::uintmax_t maxSize )
@@ -152,6 +167,11 @@ std::filesystem::path Emulator::savePath() const
   return mSettings.saveDirectory / mRunningCartridge.filename().replace_extension( ".sav" );
 }
 
+std::filesystem::path Emulator::rtcPath() const
+{
+  return mSettings.saveDirectory / mRunningCartridge.filename().replace_extension( ".rtc" );
+}
+
 std::filesystem::path Emulator::internalEepromPath( machine::Model model ) const
 {
   return mSettings.saveDirectory / ( std::string{ modelName( model ) } + ".ieeprom" );
@@ -193,6 +213,8 @@ std::expected<void, std::string> Emulator::powerUp()
                         .bootRom = {},
                         .internalEeprom = {},
                         .save = {},
+                        .rtc = {},
+                        .rtcSecondsAway = 0,
                         .audioMode = mSettings.audioMode,
                         .lcdShowIcons = mSettings.lcdShowIcons };
   if ( mSettings.useBootRom )
@@ -221,6 +243,18 @@ std::expected<void, std::string> Emulator::powerUp()
     {
       setup.internalEeprom = std::move( *eeprom );
     }
+    // The clock ran on its battery while the emulator was off.
+    if ( auto clock = readFile( rtcPath(), RTC_FILE_SIZE ); clock && clock->size() == RTC_FILE_SIZE )
+    {
+      std::uint64_t saved = 0;
+      for ( std::size_t i = 0; i < 8; ++i )
+      {
+        saved |= std::uint64_t{ ( *clock )[RTC_REGISTERS + i] } << ( 8 * i );
+      }
+      std::uint64_t const now = hostSeconds();
+      setup.rtc.assign( clock->begin(), clock->begin() + RTC_REGISTERS );
+      setup.rtcSecondsAway = now > saved ? now - saved : 0;
+    }
   }
 
   mMachine = std::make_unique<machine::Machine>( std::move( setup ) );
@@ -248,6 +282,19 @@ std::expected<void, std::string> Emulator::flushSaves()
       {
         return written;
       }
+    }
+  }
+  if ( mMachine->hasRtc() )
+  {
+    std::vector<std::uint8_t> clock = mMachine->rtc();
+    std::uint64_t const now = hostSeconds();
+    for ( std::size_t i = 0; i < 8; ++i )
+    {
+      clock.push_back( static_cast<std::uint8_t>( now >> ( 8 * i ) ) );
+    }
+    if ( auto const written = writeFile( rtcPath(), clock ); !written )
+    {
+      return written;
     }
   }
   return writeFile( internalEepromPath( mMachine->model() ),

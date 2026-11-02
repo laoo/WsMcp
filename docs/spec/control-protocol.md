@@ -314,7 +314,7 @@ Errors: `not_found`, `load_failed`, `bad_request`.
 Takes no parameters.
 
 ```json
-{"id":2,"ok":true,"result":{"path":"game.wsc","model":"wsc","publisher":1,"game_id":20,"color_support":true,"vertical":false,"rom_size":4194304,"rom_crc32":"0f1e2d3c","game_version":0,"checksum":40128,"checksum_ok":true,"header_hex":"ea00c000f00001011400030441000cb0","save_ram_size":32768,"cart_eeprom_size":0,"internal_eeprom_size":2048,"boot_rom":true,"boot_rom_crc32":"..."}}
+{"id":2,"ok":true,"result":{"path":"game.wsc","model":"wsc","publisher":1,"game_id":20,"color_support":true,"vertical":false,"rom_size":4194304,"rom_crc32":"0f1e2d3c","game_version":0,"checksum":40128,"checksum_ok":true,"header_hex":"ea00c000f00001011400030441000cb0","save_ram_size":32768,"cart_eeprom_size":0,"internal_eeprom_size":2048,"rtc":false,"boot_rom":true,"boot_rom_crc32":"..."}}
 ```
 
 | Field | Meaning |
@@ -326,6 +326,7 @@ Takes no parameters.
 | `checksum`, `checksum_ok` | The header's checksum, and whether the 16-bit sum of every other byte of the ROM is it. |
 | `header_hex` | The header whole: the last 16 bytes of the ROM. |
 | `save_ram_size`, `cart_eeprom_size`, `internal_eeprom_size` | The cartridge's SRAM and EEPROM (0 for none) and the console's EEPROM, in bytes. |
+| `rtc` | Whether the cartridge has a real-time clock: whether its header names the Bandai 2003 mapper. |
 | `boot_rom`, `boot_rom_crc32` | Whether the boot ROM ran, and when it did, its CRC-32. |
 
 Errors: `no_machine`.
@@ -334,7 +335,11 @@ Errors: `no_machine`.
 
 Takes no parameters. Writes the cartridge's SRAM or EEPROM and the console's EEPROM to the save
 directory now, as a power-up and the emulator's end do: the cartridge's as its file name with
-`.sav`, the console's as `ws.ieeprom`, `wsc.ieeprom` or `sc.ieeprom`. Answers
+`.sav`, the console's as `ws.ieeprom`, `wsc.ieeprom` or `sc.ieeprom`. A cartridge's clock is
+written as its file name with `.rtc`: the S-3511A's ten registers (the date and time, the
+configuration, the alarm), then the host's time, seconds since 1970, eight bytes little-endian.
+At the next power-up the clock runs on by the time since then; without the file it starts as a
+new battery leaves it. Answers
 `{"written", "save_directory"}`; without a save directory nothing is written.
 
 Errors: `no_machine`, `save_failed`.
@@ -478,7 +483,7 @@ PPU latches for the line it draws is `{"value", "latch"}`.
 | `keypad` | `input_select`, the rows `$B5` selects. |
 | `serial` | `enabled`, `baud` (9600 or 38400), the send and receive buffers and flags. |
 | `internal_eeprom` | The console's EEPROM: `size`, the command, control and buffers, its flags. |
-| `cart` | `banks`, the four bank registers `$C0`-`$C3`; `eeprom`, as `internal_eeprom`, `size` `none` without one. |
+| `cart` | `banks`, the four bank registers, `$C0`-`$C3` with, on the 2003, the high bits of `$CF`-`$D5`; `eeprom`, as `internal_eeprom`, `size` `none` without one. On a Bandai 2003, `bandai2003`: `gpo_enable` and `gpo_data` (`$CC`, `$CD`), `flash_selected` (`$CE`), and `rtc`, the S-3511A's `date_time` (seven BCD bytes: year, month, day, day of the week, hour with bit 7 PM, minute, second), `config` and `alarm`, and the command running: `control` as `$CA` reads, `data` as `$CB` holds, `phase` (`idle`, `command`, `payload`, `wait_write`, `wait_read`) and `payload_index`. |
 
 Errors: `no_machine`.
 
@@ -682,7 +687,7 @@ directory (`--state-dir`, or the working directory). `state.list` answers the `.
 there, `{"states":["a.wsstate"]}`; `state.save` adds no extension of its own.
 
 A state holds everything a run changes: every part's registers, work RAM, the cartridge's SRAM
-and EEPROM, and the console's EEPROM. It holds none of the ROMs, the breakpoints, the
+and EEPROM, its clock, and the console's EEPROM. It holds none of the ROMs, the breakpoints, the
 watchpoints, the trace or the last complete picture, and the buttons held stay as they are. It is read back by the
 build that wrote it, into a machine of the same model with the same cartridge; any other is
 refused with `state_mismatch`, and the machine runs on as it was. Loading a state, then running,

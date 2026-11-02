@@ -15,6 +15,26 @@ at, `b9fa69ddc6d0a331fb103fdb5eef6904305703c2`, in its header.
 The control protocol, the transports, the batch scripts and the build are the owner's own, shared by
 their emulators.
 
+## The Bandai 2003's RTC: ares
+
+Where the WSdev wiki is silent, the Bandai 2003's ports and the S-3511A's calendar and interrupts
+follow **ares**, https://github.com/ares-emulator/ares, at
+`4307bf2eff6e4f9a277fdc6f9d4f4de177b3f932` (`ares/ws/cartridge/rtc.cpp` and `io.cpp`), released
+under this licence:
+
+> Copyright (c) 2004-2025 ares team, Near et al
+>
+> Permission to use, copy, modify, and/or distribute this software for any purpose with or without
+> fee is hereby granted, provided that the above copyright notice and this permission notice
+> appear in all copies.
+>
+> THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+> SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+> AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+> WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+> NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+> OF THIS SOFTWARE.
+
 ## Libraries
 
 Fetched when the build is configured ([cmake/Dependencies.cmake](cmake/Dependencies.cmake)), and

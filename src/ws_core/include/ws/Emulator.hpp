@@ -103,6 +103,9 @@ public:
 
 private:
   [[nodiscard]] std::filesystem::path savePath() const;
+  /// The cartridge's clock: its registers, then the host's time when they
+  /// were written, seconds since 1970, 8 bytes little-endian.
+  [[nodiscard]] std::filesystem::path rtcPath() const;
   [[nodiscard]] std::filesystem::path internalEepromPath( machine::Model model ) const;
 
   Settings mSettings;

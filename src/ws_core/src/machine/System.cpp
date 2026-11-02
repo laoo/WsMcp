@@ -110,7 +110,7 @@ System::System( Config const& config,
   mDmaController = std::make_unique<DmaController>( *this );
   mPpu = std::make_unique<Ppu>( *this );
   mApu = std::make_unique<Apu>( *this );
-  mCart = std::make_unique<Cart>( *this );
+  mCart = std::make_unique<Cart>( *this, info.mapper == 1 );
 
   mMemoryManager->init();
 
@@ -384,6 +384,7 @@ void System::frameDone( std::span<std::uint16_t const> pixels, std::uint32_t wid
   {
     mCartEeprom->run();
   }
+  mCart->run();
 
   LcdIcons const& icons = mPpu->getState().icons;
   mVerticalMode |= icons.vertical;
@@ -410,7 +411,7 @@ void System::serialize( Archive& archive )
   archive.chunk( fourCc( "PPU " ), 1, *mPpu );
   archive.chunk( fourCc( "APU " ), 1, *mApu );
   // Process cart before memory manager to ensure mappings are updated properly
-  archive.chunk( fourCc( "CART" ), 1, *mCart );
+  archive.chunk( fourCc( "CART" ), 2, *mCart );
   archive.chunk( fourCc( "MEMM" ), 1, *mMemoryManager );
   archive.chunk( fourCc( "DMA " ), 1, *mDmaController );
   archive.chunk( fourCc( "CTRL" ), 1, *mControlManager );

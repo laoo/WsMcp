@@ -489,9 +489,62 @@ struct EepromState
   bool internalEepromWriteProtected{};
 };
 
+/// Where a command of the Bandai 2003's RTC interface stands.
+enum class RtcPhase : std::uint8_t
+{
+  /// No command runs.
+  IDLE,
+  /// The command byte goes out to the S-3511A.
+  COMMAND,
+  /// A payload byte goes out, or comes in.
+  PAYLOAD,
+  /// The 2003 waits for the next payload byte to be written to $CB.
+  WAIT_WRITE,
+  /// The 2003 waits for the payload byte it holds to be read from $CB.
+  WAIT_READ
+};
+
+/// The Bandai 2003's RTC interface and the Seiko S-3511A behind it.
+struct RtcState
+{
+  /// The S-3511A's date and time, BCD: year, month, day, day of the week,
+  /// hour (bit 7 PM), minute, second.
+  std::array<std::uint8_t, 7> dateTime{};
+  /// Its configuration: power failure, 24-hour mode, the interrupt mode.
+  std::uint8_t config{};
+  /// Its alarm, or the frequency of its interrupt.
+  std::array<std::uint8_t, 2> alarm{};
+  /// Cycles of the CPU's clock into the current second, and the master clock
+  /// the time was last brought up to.
+  std::uint32_t subsecond{};
+  std::uint64_t lastClock{};
+  /// Whether the per-minute interrupt has been raised and not yet taken.
+  bool minuteIrq{};
+
+  /// $CA as the 2003 holds it: the command written, bit 4 while it runs.
+  std::uint8_t command{};
+  bool ready{};
+  RtcPhase phase{ RtcPhase::IDLE };
+  /// The master clock at which the byte going out or coming in is through.
+  std::uint64_t phaseEnd{};
+  /// $CB: the payload byte held, the next to send or the last received.
+  std::uint8_t data{};
+  /// The command's payload, and the bytes of it through.
+  std::array<std::uint8_t, 7> payload{};
+  std::uint8_t index{};
+};
+
 struct CartState
 {
-  std::array<std::uint8_t, 4> selectedBanks{};
+  /// $C0-$C3, and on the 2003 the high bits $CF-$D5 add: the 1 MB bank at
+  /// $40000, and the 64 KB banks at $10000, $20000 and $30000.
+  std::array<std::uint16_t, 4> selectedBanks{};
+  /// The 2003's general-purpose outputs, $CC and $CD.
+  std::uint8_t gpoEnable{};
+  std::uint8_t gpoData{};
+  /// The 2003's $CE: the ROM, not the SRAM, at $10000-$1FFFF.
+  bool flashSelected{};
+  RtcState rtc{};
 };
 
 /// Every part's state at once, as the debugger shows it.

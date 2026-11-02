@@ -29,6 +29,7 @@ add_library( ws_core
   src/machine/MemoryManager.cpp
   src/machine/Picture.cpp
   src/machine/Ppu.cpp
+  src/machine/Rtc.cpp
   src/machine/Serial.cpp
   src/machine/System.cpp
   src/machine/Timer.cpp

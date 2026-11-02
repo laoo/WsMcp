@@ -5,6 +5,7 @@ add_executable( ws_tests
   machine/ApuTest.cpp
   machine/MachineTest.cpp
   machine/PpuTest.cpp
+  machine/RtcTest.cpp
   machine/TestRomsTest.cpp
   server/JsonLinesServerTest.cpp
   server/McpServerTest.cpp

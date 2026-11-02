@@ -352,8 +352,6 @@ TEST_CASE( "ws-test-suite's tests pass", "[test-roms]" )
 {
   // Each program, the machine it runs on, and the ticks it draws when every
   // condition holds. The Wonderful build's mono programs run on both models.
-  // rtc/mapper is left out: Mesen2 has no cartridge RTC yet
-  // (docs/plans/queue.md).
   struct Program
   {
     std::string_view rom;
@@ -372,6 +370,7 @@ TEST_CASE( "ws-test-suite's tests pass", "[test-roms]" )
     programs.push_back( { .rom = "mono/eeprom/cartridge_1kbit.ws", .model = model, .passed = 30 } );
     programs.push_back(
         { .rom = "mono/eeprom/internal.ws", .model = model, .passed = model == Model::MONOCHROME ? 23U : 27U } );
+    programs.push_back( { .rom = "mono/rtc/mapper.ws", .model = model, .passed = 27 } );
     programs.push_back( { .rom = "mono/soc/interrupts.ws", .model = model, .passed = 13 } );
     programs.push_back( { .rom = "mono/sound/quirks.ws", .model = model, .passed = 20 } );
   }

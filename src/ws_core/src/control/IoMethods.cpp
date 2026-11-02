@@ -190,69 +190,93 @@ Json eepromJson( machine::EepromState const& eeprom )
                { "internal_write_protected", eeprom.internalEepromWriteProtected } };
 }
 
-Json stateJson( machine::State const& state )
+/// The 2003's own ports and its RTC: the S-3511A's registers and where the
+/// command running stands.
+Json bandai2003Json( machine::CartState const& cart )
+{
+  machine::RtcState const& rtc = cart.rtc;
+  static constexpr std::array<char const*, 5> PHASES{ "idle", "command", "payload", "wait_write", "wait_read" };
+  return Json{ { "gpo_enable", cart.gpoEnable },
+               { "gpo_data", cart.gpoData },
+               { "flash_selected", cart.flashSelected },
+               { "rtc",
+                 { { "date_time", rtc.dateTime },
+                   { "config", rtc.config },
+                   { "alarm", rtc.alarm },
+                   { "control", ( rtc.ready ? 0x80U : 0U ) | rtc.command },
+                   { "data", rtc.data },
+                   { "phase", PHASES.at( static_cast<std::size_t>( rtc.phase ) ) },
+                   { "payload_index", rtc.index } } } };
+}
+
+Json stateJson( machine::State const& state, bool bandai2003 )
 {
   machine::MemoryManagerState const& memory = state.memoryManager;
   machine::DmaControllerState const& dma = state.dmaController;
   machine::TimerState const& timer = state.timer;
   machine::SerialState const& serial = state.serial;
-  return Json{ { "model", modelName( state.model ) },
-               { "ppu", ppuJson( state.ppu ) },
-               { "apu", apuJson( state.apu ) },
-               { "timer",
-                 { { "control", timer.control },
-                   { "h_timer", timer.hTimer },
-                   { "h_reload", timer.hReloadValue },
-                   { "h_enabled", timer.hBlankEnabled },
-                   { "h_auto_reload", timer.hBlankAutoReload },
-                   { "v_timer", timer.vTimer },
-                   { "v_reload", timer.vReloadValue },
-                   { "v_enabled", timer.vBlankEnabled },
-                   { "v_auto_reload", timer.vBlankAutoReload } } },
-               { "dma",
-                 { { "gdma_source", dma.gdmaSrc },
-                   { "gdma_destination", dma.gdmaDest },
-                   { "gdma_length", dma.gdmaLength },
-                   { "gdma_control", dma.gdmaControl },
-                   { "sdma_source", dma.sdmaSrc },
-                   { "sdma_length", dma.sdmaLength },
-                   { "sdma_source_reload", dma.sdmaSrcReloadValue },
-                   { "sdma_length_reload", dma.sdmaLengthReloadValue },
-                   { "sdma_control", dma.sdmaControl },
-                   { "sdma_enabled", dma.sdmaEnabled },
-                   { "sdma_decrement", dma.sdmaDecrement },
-                   { "sdma_hyper_voice", dma.sdmaHyperVoice },
-                   { "sdma_repeat", dma.sdmaRepeat },
-                   { "sdma_hold", dma.sdmaHold },
-                   { "sdma_frequency", dma.sdmaFrequency },
-                   { "sdma_timer", dma.sdmaTimer } } },
-               { "memory_manager",
-                 { { "active_irqs", memory.activeIrqs },
-                   { "enabled_irqs", memory.enabledIrqs },
-                   { "irq_vector_offset", memory.irqVectorOffset },
-                   { "system_control2", memory.systemControl2 },
-                   { "system_test", memory.systemTest },
-                   { "color_enabled", memory.colorEnabled },
-                   { "enable_4bpp", memory.enable4bpp },
-                   { "enable_4bpp_packed", memory.enable4bppPacked },
-                   { "boot_rom_disabled", memory.bootRomDisabled },
-                   { "cart_word_bus", memory.cartWordBus },
-                   { "slow_rom", memory.slowRom },
-                   { "slow_sram", memory.slowSram },
-                   { "slow_port", memory.slowPort },
-                   { "low_battery_nmi", memory.enableLowBatteryNmi },
-                   { "power_off_requested", memory.powerOffRequested } } },
-               { "keypad", { { "input_select", state.controlManager.inputSelect } } },
-               { "serial",
-                 { { "enabled", serial.enabled },
-                   { "baud", serial.highSpeed ? 38400 : 9600 },
-                   { "has_send_data", serial.hasSendData },
-                   { "send_buffer", serial.sendBuffer },
-                   { "has_receive_data", serial.hasReceiveData },
-                   { "receive_buffer", serial.receiveBuffer },
-                   { "receive_overflow", serial.receiveOverflow } } },
-               { "internal_eeprom", eepromJson( state.internalEeprom ) },
-               { "cart", { { "banks", state.cart.selectedBanks }, { "eeprom", eepromJson( state.cartEeprom ) } } } };
+  Json json{ { "model", modelName( state.model ) },
+             { "ppu", ppuJson( state.ppu ) },
+             { "apu", apuJson( state.apu ) },
+             { "timer",
+               { { "control", timer.control },
+                 { "h_timer", timer.hTimer },
+                 { "h_reload", timer.hReloadValue },
+                 { "h_enabled", timer.hBlankEnabled },
+                 { "h_auto_reload", timer.hBlankAutoReload },
+                 { "v_timer", timer.vTimer },
+                 { "v_reload", timer.vReloadValue },
+                 { "v_enabled", timer.vBlankEnabled },
+                 { "v_auto_reload", timer.vBlankAutoReload } } },
+             { "dma",
+               { { "gdma_source", dma.gdmaSrc },
+                 { "gdma_destination", dma.gdmaDest },
+                 { "gdma_length", dma.gdmaLength },
+                 { "gdma_control", dma.gdmaControl },
+                 { "sdma_source", dma.sdmaSrc },
+                 { "sdma_length", dma.sdmaLength },
+                 { "sdma_source_reload", dma.sdmaSrcReloadValue },
+                 { "sdma_length_reload", dma.sdmaLengthReloadValue },
+                 { "sdma_control", dma.sdmaControl },
+                 { "sdma_enabled", dma.sdmaEnabled },
+                 { "sdma_decrement", dma.sdmaDecrement },
+                 { "sdma_hyper_voice", dma.sdmaHyperVoice },
+                 { "sdma_repeat", dma.sdmaRepeat },
+                 { "sdma_hold", dma.sdmaHold },
+                 { "sdma_frequency", dma.sdmaFrequency },
+                 { "sdma_timer", dma.sdmaTimer } } },
+             { "memory_manager",
+               { { "active_irqs", memory.activeIrqs },
+                 { "enabled_irqs", memory.enabledIrqs },
+                 { "irq_vector_offset", memory.irqVectorOffset },
+                 { "system_control2", memory.systemControl2 },
+                 { "system_test", memory.systemTest },
+                 { "color_enabled", memory.colorEnabled },
+                 { "enable_4bpp", memory.enable4bpp },
+                 { "enable_4bpp_packed", memory.enable4bppPacked },
+                 { "boot_rom_disabled", memory.bootRomDisabled },
+                 { "cart_word_bus", memory.cartWordBus },
+                 { "slow_rom", memory.slowRom },
+                 { "slow_sram", memory.slowSram },
+                 { "slow_port", memory.slowPort },
+                 { "low_battery_nmi", memory.enableLowBatteryNmi },
+                 { "power_off_requested", memory.powerOffRequested } } },
+             { "keypad", { { "input_select", state.controlManager.inputSelect } } },
+             { "serial",
+               { { "enabled", serial.enabled },
+                 { "baud", serial.highSpeed ? 38400 : 9600 },
+                 { "has_send_data", serial.hasSendData },
+                 { "send_buffer", serial.sendBuffer },
+                 { "has_receive_data", serial.hasReceiveData },
+                 { "receive_buffer", serial.receiveBuffer },
+                 { "receive_overflow", serial.receiveOverflow } } },
+             { "internal_eeprom", eepromJson( state.internalEeprom ) },
+             { "cart", { { "banks", state.cart.selectedBanks }, { "eeprom", eepromJson( state.cartEeprom ) } } } };
+  if ( bandai2003 )
+  {
+    json["cart"]["bandai2003"] = bandai2003Json( state.cart );
+  }
+  return json;
 }
 
 } // namespace
@@ -340,7 +364,7 @@ void addIoMethods( Dispatcher& dispatcher, Emulator& emulator )
         {
           return std::unexpected( machine.error() );
         }
-        return stateJson( ( *machine )->state() );
+        return stateJson( ( *machine )->state(), ( *machine )->hasRtc() );
       } );
 }
 

@@ -10,7 +10,7 @@ around it. An LLM ported it; all credit for understanding the machine goes to Me
 - The NEC V30MZ runs with its prefetch queue and wait states, and every cycle steps the PPU a dot
   and the APU a clock, as in Mesen2.
 - All three models, the boot ROM's splash and the internal EEPROM, cartridges with SRAM or
-  EEPROM, the sound DMA and the HyperVoice of the Color.
+  EEPROM or the Bandai 2003's real-time clock, the sound DMA and the HyperVoice of the Color.
 - Other programs and AI agents control it over JSON lines or MCP: run it, press its buttons, read
   its memory, registers and picture, stop it at breakpoints and watchpoints, search the history
   of execution, save and load states.

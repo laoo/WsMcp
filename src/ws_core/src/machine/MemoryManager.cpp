@@ -213,6 +213,11 @@ T MemoryManager::debugReadPort( std::uint16_t port )
       // TODOWS implement peek to avoid side-effects for these ports
       return 0;
     }
+    if ( port == 0xCA || port == 0xCB )
+    {
+      // The 2003's RTC moves a command on when $CB is read.
+      return mSystem->getCart()->peekPort( port );
+    }
 
     return internalReadPort( port, false );
   }
