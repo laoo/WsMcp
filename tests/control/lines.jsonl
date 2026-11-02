@@ -1,0 +1,30 @@
+# The control protocol as JSON lines (docs/spec/control-protocol.md): framing,
+# errors and the methods that answer without a cartridge. lines.expect holds the answers.
+{"id":1,"method":"emu.status","params":{}}
+not json
+[1,2]
+{"method":"emu.status"}
+{"id":-1,"method":"emu.status"}
+{"id":"0x5","method":"emu.status"}
+{"id":3}
+{"id":4,"method":"emu.status","params":[]}
+{"id":5,"method":"emu.nonsense"}
+{"id":17,"method":"emu.pause"}
+{"id":18,"method":"emu.status"}
+{"id":19,"method":"emu.resume"}
+{"id":20,"method":"emu.status"}
+{"id":21,"method":"memory.list_regions"}
+{"id":22,"method":"cpu.get_state"}
+{"id":23,"method":"emu.run_frames","params":{"count":60}}
+{"id":24,"method":"emu.reset"}
+{"id":25,"method":"cart.load"}
+{"id":26,"method":"cart.load","params":{"path":"control/no-such-cartridge.ws"}}
+{"id":27,"method":"cart.load","params":{"path":"control/no-such-cartridge.ws","model":"gb"}}
+{"id":28,"method":"cart.info"}
+{"id":29,"method":"emu.set_bios_directory"}
+{"id":30,"method":"debug.trace.configure","params":{"seconds":0.5}}
+{"id":31,"method":"debug.trace.configure","params":{"seconds":60}}
+{"id":32,"method":"debug.breakpoint.add","params":{"address":"F000:FFF0"}}
+{"id":33,"method":"input.press","params":{"buttons":["start"]}}
+{"id":34,"method":"serial.read"}
+{"id":35,"method":"state.list"}

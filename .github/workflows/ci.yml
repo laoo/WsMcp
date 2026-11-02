@@ -1,0 +1,166 @@
+name: CI
+
+# Run by hand (Actions > CI > Run workflow, or `gh workflow run ci.yml`), or by
+# pushing a tag v*: it builds the emulator on the three platforms, runs the
+# suite and packages what a release would hold; a tag v* also publishes those
+# packages as a GitHub release. The tests that need ROMs, and the regression
+# suite, skip here: no ROM is ever part of the repository.
+# docs/decisions/0013-ci-and-releases.md and 0019-ci-runs-when-asked.md say why
+# it is laid out this way.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    name: format
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # The LLVM the formatting was made with: another version formats
+      # differently.
+      - name: Install clang-format 23
+        run: |
+          wget -q https://apt.llvm.org/llvm.sh
+          sudo bash llvm.sh 23
+          sudo apt-get install -y clang-format-23
+
+      - name: Check formatting
+        env:
+          LLVM_DIR: /usr/lib/llvm-23
+        run: scripts/format.sh --check
+
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macos-arm64
+            os: macos-latest
+          - name: linux-x64
+            os: ubuntu-24.04
+          - name: windows-x64
+            os: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # The version is `git describe`'s answer, so the tags are needed.
+          fetch-depth: 0
+
+      - name: Install build tools (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ninja
+
+      # What SDL3 needs to reach the display, the sound and the gamepads.
+      - name: Install build tools (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build gcc-14 g++-14 \
+            libasound2-dev libpulse-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev \
+            libxi-dev libxss-dev libxtst-dev libxkbcommon-dev libwayland-dev libegl1-mesa-dev \
+            libdbus-1-dev libudev-dev
+
+      - name: Configure (macOS)
+        if: runner.os == 'macOS'
+        run: cmake --preset release -DWS_WERROR=ON -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0
+
+      - name: Configure (Linux)
+        if: runner.os == 'Linux'
+        env:
+          CC: gcc-14
+          CXX: g++-14
+        run: cmake --preset release -DWS_WERROR=ON
+
+      # The C runtime linked in, so that no Visual C++ redistributable is needed.
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --preset windows -DWS_WERROR=ON "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded$<$<CONFIG:Debug>:Debug>"
+
+      - name: Build
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cmake --build build/windows --config Release --parallel
+          else
+            cmake --build --preset release
+          fi
+
+      - name: Test
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            ctest --test-dir build/windows -C Release --output-on-failure --parallel 4
+          else
+            ctest --preset release
+          fi
+
+      - name: Package
+        shell: bash
+        run: |
+          version="${{ github.ref_type == 'tag' && github.ref_name || '' }}"
+          version="${version:-$(git rev-parse --short HEAD)}"
+          package="WsMcp-${version}-${{ matrix.name }}"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cmake --install build/windows --config Release --component wsmcp --prefix "$package"
+          else
+            cmake --install build/release --component wsmcp --prefix "$package" --strip
+          fi
+          case "$RUNNER_OS" in
+            macOS)
+              # Signed for itself, not by a developer: macOS asks once before
+              # opening it (README.md says how).
+              codesign --force --deep --sign - "$package/WsMcp.app"
+              ditto -c -k --keepParent "$package" "$package.zip"
+              echo "PACKAGE=$package.zip" >> "$GITHUB_ENV" ;;
+            Linux)
+              tar czf "$package.tar.gz" "$package"
+              echo "PACKAGE=$package.tar.gz" >> "$GITHUB_ENV" ;;
+            Windows)
+              cmake -E tar cf "$package.zip" --format=zip "$package"
+              echo "PACKAGE=$package.zip" >> "$GITHUB_ENV" ;;
+          esac
+
+      - name: Upload Package
+        uses: actions/upload-artifact@v7
+        with:
+          name: WsMcp-${{ matrix.name }}
+          path: ${{ env.PACKAGE }}
+          if-no-files-found: error
+
+  release:
+    name: release
+    needs: [format, build]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Packages
+        uses: actions/download-artifact@v8
+        with:
+          path: packages
+          merge-multiple: true
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" packages/* \
+            --repo "${{ github.repository }}" \
+            --title "WsMcp ${{ github.ref_name }}" \
+            --generate-notes \
+            --verify-tag

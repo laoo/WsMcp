@@ -1,0 +1,113 @@
+# Working in this repository
+
+## Language
+
+Discussion with the user is in Polish. **All code, comments, documentation,
+commit messages and identifiers are in English.**
+
+## Build and test
+
+```sh
+cmake --preset debug && cmake --build --preset debug && ctest --preset debug
+emcmake cmake --preset wasm && cmake --build --preset wasm      # the core for a browser: build/wasm/src/ws_web/wsmcp.{js,wasm}
+```
+
+Presets: `debug`, `release`, `asan`, `wasm`. Never create build directories by hand;
+the presets own `build/<preset>`. The test presets run tests in parallel on
+every core. The desktop application (`-DWS_BUILD_APP=ON`) is not built yet
+([docs/plans/queue.md](docs/plans/queue.md)).
+
+```sh
+build/debug/src/ws_cli/wsmcp-cli --server tcp:7701 --bios-dir ~/Documents/WS/BIOS --save-dir build/saves   # JSON lines on TCP
+build/debug/src/ws_cli/wsmcp-cli --mcp --bios-dir ~/Documents/WS/BIOS "game.wsc"                              # MCP for an agent
+ctest --preset debug -L control                     # the protocol's recorded transcripts, tests/control/*.jsonl
+ctest --preset debug -L regression                  # the batch scripts, tests/regression/*.json, against their golden sums
+(cd tests && ../build/debug/src/ws_cli/wsmcp-cli --transcript control/lines.jsonl > control/lines.expect)   # re-record one, after a deliberate change of answers
+```
+
+```sh
+./scripts/format.sh          # format in place
+./scripts/format.sh --check  # fail on deviation
+./scripts/tidy.sh            # clang-tidy against build/debug
+```
+
+Homebrew keeps LLVM keg-only, so `clang-tidy` is not on `PATH` on macOS, and it
+does not know where Apple's SDK keeps the standard library. `scripts/tidy.sh`
+handles both; do not invoke `clang-tidy` directly.
+
+An agent drives the emulator with the project skill, `.claude/skills/wsmcp/SKILL.md`.
+
+## Layout
+
+| Path | Contents |
+|---|---|
+| `src/ws_core/` | The emulated machine and the control dispatcher. All logic; no SDL, ImGui, threads, sockets or file dialogs; deterministic; compiles to WebAssembly. |
+| `src/ws_core/src/machine/`, `src/ws_core/src/cpu/` | The parts, ported from Mesen2's `Core/WS`, one class per Mesen2 part. |
+| `src/ws_server/` | Transports onto the dispatcher: JSON-lines (stdio, TCP) and MCP. |
+| `src/ws_cli/` | `wsmcp-cli`: headless runs, `--server`, `--mcp`, `--transcript`, `--batch`. Argument parsing and I/O only. |
+| `src/ws_web/` | The WebAssembly binding (embind), built by the `wasm` preset alone. |
+| `tests/` | Catch2 v3 tests, linked against `ws_core`; `control/` also holds the protocol's recorded transcripts. |
+| `.claude/skills/wsmcp/` | The project skill an agent drives the emulator with. |
+| `cmake/` | `Warnings.cmake`, `Dependencies.cmake`, `Version.cmake`, `Install.cmake`. |
+| `docs/` | See `docs/README.md`; it is the index and the rulebook. |
+
+## The workspace around it
+
+The repository builds and tests on its own. These are optional and read-only;
+the tests that need one skip without it:
+
+- `../Mesen2` — Mesen2 at `b9fa69ddc6d0a331fb103fdb5eef6904305703c2`. Its
+  `Core/WS` is the reference for the machine; port from it
+  ([0002](docs/decisions/0002-references.md)).
+- `~/Documents/WS/BIOS` — the owner's boot ROM dumps (WonderSwan, Color,
+  SwanCrystal), under No-Intro's names.
+- `~/Documents/WS/ROM` — the owner's cartridges; the tests run the public-domain
+  ones, `(PD)` in their names.
+- `../PetMcp` — the owner's PET emulator, whose architecture, protocol, style and
+  documentation regime this one takes.
+- https://github.com/wonderfultoolchain/awesome-wsdev — the index of the
+  WonderSwan's documentation, test ROMs and tools. The `context-awesome` MCP
+  server in `.mcp.json` searches it.
+
+## Code style
+
+Enforced by `.clang-format` and `.clang-tidy`; the summary below is for
+orientation, and the config files are the authority.
+
+- Allman braces, 2-space indent, no tabs, 120-column limit.
+- Spaces inside parentheses, but not empty ones: `foo( a, b )`, `if ( x )`, `bar()`.
+- East const, pointer on the left: `int* p`, `int const* p`.
+- Types are `CamelCase`; functions and variables are `camelBack`; namespaces are
+  `lower_case` (`ws`, `ws::machine`, `ws::control`, ...).
+- Class members are `mMember` (private or protected); struct members are `member` (public).
+- Constants are `UPPER_CASE` at namespace and class scope, and `camelBack` inside functions.
+- Enum names follow types; enum constants follow constants.
+- File names are `CamelCase.hpp` / `CamelCase.cpp`.
+- Emulated registers, buses and bit fields are held in unsigned fixed-width
+  types (`std::uint8_t` ... `std::uint64_t`).
+- A name ported from Mesen2 keeps its words: `WsPpu::ProcessEndOfScanline`
+  becomes `Ppu::processEndOfScanline`, `_state.ScrollX` becomes `mState.scrollX`.
+- Every ported file's header comment names the Mesen2 file(s) it ports and the
+  commit they were read at.
+
+C++23, but only the subset Apple clang, GCC, MSVC and Emscripten all implement.
+`src/ws_core/src/PortabilityChecks.cpp` pins that subset down. Prefer `fmt` (via
+spdlog) over `std::format`, and avoid `std::print`, `<stacktrace>` and
+`std::flat_map`.
+
+## Documentation discipline
+
+The rules are in `docs/README.md` and they are not optional. In short:
+
+- Documentation carries **why** and **contracts**; code carries **how**.
+- One fact, one place; everywhere else links to it. Facts about the WonderSwan
+  stay in Mesen2 and the WSdev wiki and are linked, not copied.
+- No status, progress or session-note files.
+- Documentation is updated **in the same commit** as the change that invalidated it.
+- A new document requires an entry in `docs/README.md`, or it does not get written.
+
+Non-obvious reasoning belongs in code comments; do not comment the obvious.
+
+## Never
+
+- Commit ROMs, boot ROMs or save files.

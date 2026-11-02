@@ -1,0 +1,28 @@
+{"id":1,"ok":true,"result":{"version":"devel","paused":false,"running":false,"error":"no cartridge is in"}}
+{"id":0,"ok":false,"error":{"code":"bad_request","message":"Request is not valid JSON"}}
+{"id":0,"ok":false,"error":{"code":"bad_request","message":"Request must be a JSON object"}}
+{"id":0,"ok":false,"error":{"code":"bad_request","message":"Missing or invalid field: id"}}
+{"id":0,"ok":false,"error":{"code":"bad_request","message":"Missing or invalid field: id"}}
+{"id":0,"ok":false,"error":{"code":"bad_request","message":"Missing or invalid field: id"}}
+{"id":3,"ok":false,"error":{"code":"bad_request","message":"Missing or invalid field: method"}}
+{"id":4,"ok":false,"error":{"code":"bad_request","message":"Field params must be an object"}}
+{"id":5,"ok":false,"error":{"code":"unknown_method","message":"Unknown method: emu.nonsense"}}
+{"id":17,"ok":true,"result":{}}
+{"id":18,"ok":true,"result":{"version":"devel","paused":true,"running":false,"error":"no cartridge is in"}}
+{"id":19,"ok":true,"result":{}}
+{"id":20,"ok":true,"result":{"version":"devel","paused":false,"running":false,"error":"no cartridge is in"}}
+{"id":21,"ok":true,"result":{"regions":[{"name":"cpu","size":null,"writable":true,"holds":"The V30MZ's 20-bit address space, as it reads it now; the region when none is named. Written as a debugger writes: only where RAM or SRAM is mapped."},{"name":"work_ram","size":null,"writable":true,"holds":"The console's RAM: 16 KB on a WonderSwan, 64 KB on a Color or SwanCrystal."},{"name":"rom","size":null,"writable":false,"holds":"The cartridge's ROM, whole, its header in its last 16 bytes."},{"name":"save_ram","size":null,"writable":true,"holds":"The cartridge's battery-backed SRAM; empty when it has none."},{"name":"boot_rom","size":null,"writable":false,"holds":"The IPL: 4 KB on a WonderSwan, 8 KB on a Color or SwanCrystal; empty when it is not run."},{"name":"internal_eeprom","size":null,"writable":true,"holds":"The console's EEPROM: the owner's name and settings."},{"name":"cart_eeprom","size":null,"writable":true,"holds":"The cartridge's EEPROM; empty when it has none."}]}}
+{"id":22,"ok":false,"error":{"code":"no_machine","message":"No machine is running: no cartridge is in"}}
+{"id":23,"ok":false,"error":{"code":"no_machine","message":"No machine is running: no cartridge is in"}}
+{"id":24,"ok":false,"error":{"code":"power_up_failed","message":"no cartridge is in"}}
+{"id":25,"ok":false,"error":{"code":"bad_request","message":"Missing or invalid field: path"}}
+{"id":26,"ok":false,"error":{"code":"not_found","message":"No file control/no-such-cartridge.ws"}}
+{"id":27,"ok":false,"error":{"code":"bad_request","message":"model is ws, wsc or sc"}}
+{"id":28,"ok":false,"error":{"code":"no_machine","message":"No machine is running: no cartridge is in"}}
+{"id":29,"ok":false,"error":{"code":"bad_request","message":"Missing or invalid field: path"}}
+{"id":30,"ok":true,"result":{"seconds":0.5}}
+{"id":31,"ok":false,"error":{"code":"bad_request","message":"seconds is 0.01 to 10"}}
+{"id":32,"ok":false,"error":{"code":"no_machine","message":"No machine is running: no cartridge is in"}}
+{"id":33,"ok":false,"error":{"code":"no_machine","message":"No machine is running: no cartridge is in"}}
+{"id":34,"ok":false,"error":{"code":"no_machine","message":"No machine is running: no cartridge is in"}}
+{"id":35,"ok":true,"result":{"states":[]}}
