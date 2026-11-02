@@ -3,6 +3,8 @@
 #include "ws/Emulator.hpp"
 #include "ws/machine/Machine.hpp"
 
+#include <miniz.h>
+
 #include <array>
 #include <charconv>
 #include <cstdint>
@@ -131,6 +133,45 @@ std::string printed( Machine& machine, Button start, std::string_view until, std
   machine.setButtons( 0 );
   machine.removeBreakpoint( vector & 0xFFFFFU );
   return text;
+}
+
+/// What a ws-test-suite program draws once it has run: its ticks and crosses,
+/// tiles 5 and 6 of the 32 x 32 map it keeps at 0x1800, and the lines with a
+/// cross, read as the ASCII its font's tiles are.
+struct Marks
+{
+  unsigned passed{};
+  unsigned failed{};
+  std::string failures;
+};
+
+Marks marksOf( Machine const& machine )
+{
+  Marks marks;
+  for ( std::uint32_t y = 0; y < 18; ++y )
+  {
+    std::string line;
+    bool failed = false;
+    for ( std::uint32_t x = 0; x < 28; ++x )
+    {
+      std::uint32_t const at = 0x1800 + ( ( ( y * 32 ) + x ) * 2 );
+      unsigned const tile = static_cast<unsigned>( machine.peek( at ) | ( machine.peek( at + 1 ) << 8U ) ) & 0x1FFU;
+      marks.passed += tile == 5 ? 1 : 0;
+      marks.failed += tile == 6 ? 1 : 0;
+      failed = failed || tile == 6;
+      char shown = tile >= 32 && tile < 127 ? static_cast<char>( tile ) : ' ';
+      if ( tile == 5 || tile == 6 )
+      {
+        shown = tile == 5 ? 'o' : 'x';
+      }
+      line += shown;
+    }
+    if ( failed )
+    {
+      marks.failures += line + '\n';
+    }
+  }
+  return marks;
 }
 
 std::size_t count( std::string_view text, std::string_view what )
@@ -304,5 +345,86 @@ TEST_CASE( "WSCpuTest passes every test of its own", "[.][test-roms][cpu-test]" 
     auto const run = machine.runFrames( 500'000 );
     REQUIRE( run.reason == StopReason::BREAKPOINT );
     REQUIRE( run.breakpoint == passed );
+  }
+}
+
+TEST_CASE( "ws-test-suite's tests pass", "[test-roms]" )
+{
+  // Each program, the machine it runs on, and the ticks it draws when every
+  // condition holds. The Wonderful build's mono programs run on both models.
+  // rtc/mapper is left out: Mesen2 has no cartridge RTC yet
+  // (docs/plans/queue.md).
+  struct Program
+  {
+    std::string_view rom;
+    Model model;
+    unsigned passed;
+  };
+
+  std::vector<Program> programs;
+  for ( Model const model : { Model::MONOCHROME, Model::COLOR } )
+  {
+    programs.push_back( { .rom = "mono/cpu/80186_quirks.ws", .model = model, .passed = 3 } );
+    programs.push_back( { .rom = "mono/cpu/interrupt_timing.ws", .model = model, .passed = 15 } );
+    programs.push_back( { .rom = "mono/cpu/prefixes.ws", .model = model, .passed = 7 } );
+    programs.push_back( { .rom = "mono/display/mono_palettes_writemask.ws", .model = model, .passed = 32 } );
+    programs.push_back( { .rom = "mono/eeprom/cartridge_16kbit.ws", .model = model, .passed = 30 } );
+    programs.push_back( { .rom = "mono/eeprom/cartridge_1kbit.ws", .model = model, .passed = 30 } );
+    programs.push_back(
+        { .rom = "mono/eeprom/internal.ws", .model = model, .passed = model == Model::MONOCHROME ? 23U : 27U } );
+    programs.push_back( { .rom = "mono/soc/interrupts.ws", .model = model, .passed = 13 } );
+    programs.push_back( { .rom = "mono/sound/quirks.ws", .model = model, .passed = 20 } );
+  }
+  programs.push_back( { .rom = "color/dma/alignment_access.wsc", .model = Model::COLOR, .passed = 8 } );
+  programs.push_back( { .rom = "color/dma/gdma_timing.wsc", .model = Model::COLOR, .passed = 13 } );
+  programs.push_back( { .rom = "color/dma/sound_dma.wsc", .model = Model::COLOR, .passed = 22 } );
+
+  for ( Program const& program : programs )
+  {
+    CAPTURE( program.rom, ws::modelName( program.model ) );
+    auto const emulator = running( testRom( "src/ws-test-suite/build/roms" ) / program.rom, program.model );
+    if ( !emulator )
+    {
+      SKIP( "ws-test-suite or the boot ROMs are not there: scripts/fetch-test-roms.sh" );
+    }
+    Machine& machine = *emulator->machine();
+    machine.runFrames( 900 );
+    Marks const marks = marksOf( machine );
+    CAPTURE( marks.failures );
+    REQUIRE( marks.failed == 0 );
+    REQUIRE( marks.passed == program.passed );
+  }
+}
+
+TEST_CASE( "ws-test-suite's display tests draw PASS", "[test-roms]" )
+{
+  // These draw PASS or FAIL with sprites and tiles rather than ticks: the
+  // pictures summed here were seen to say PASS on every line.
+  struct Program
+  {
+    std::string_view rom;
+    Model model;
+    std::uint32_t picture;
+  };
+
+  std::array<Program, 3> const programs{ {
+      { .rom = "mono/display/sprite_scanline_limit.ws", .model = Model::MONOCHROME, .picture = 0x476D15FD },
+      { .rom = "mono/display/sprite_scanline_limit.ws", .model = Model::COLOR, .picture = 0x47AEFB34 },
+      { .rom = "color/display/tile_screen_extended_range.wsc", .model = Model::COLOR, .picture = 0x23CC704A },
+  } };
+  for ( Program const& program : programs )
+  {
+    CAPTURE( program.rom, ws::modelName( program.model ) );
+    auto const emulator = running( testRom( "src/ws-test-suite/build/roms" ) / program.rom, program.model );
+    if ( !emulator )
+    {
+      SKIP( "ws-test-suite or the boot ROMs are not there: scripts/fetch-test-roms.sh" );
+    }
+    Machine& machine = *emulator->machine();
+    machine.runFrames( 900 );
+    auto const picture = machine.picture();
+    auto const sum = static_cast<std::uint32_t>( mz_crc32( MZ_CRC32_INIT, picture.data(), picture.size() ) );
+    CAPTURE( sum );
+    REQUIRE( sum == program.picture );
   }
 }

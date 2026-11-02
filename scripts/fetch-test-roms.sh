@@ -7,8 +7,13 @@
 # FluBBaOfWard's WSCpuTest is fetched as its release; his WSHWTest and
 # WSTimingTest are assembled with NASM (brew install nasm) from fixed commits,
 # so that a result can be reproduced and the listings name where their
-# routines are. Downloads are checked against their SHA-256. Kept free of
-# bash-4 features: macOS ships bash 3.2.
+# routines are. asiekierka's ws-test-suite is C on libws, built with the
+# Wonderful toolchain, which this script installs into build/tools/wonderful
+# rather than the /opt/wonderful its guide asks for, so that no root is
+# needed: its package manager places itself where it is, and its Lua tools'
+# first lines are pointed there. It needs GNU make 4 (brew install make on
+# macOS, whose make is 3.81). Downloads are checked against their SHA-256.
+# Kept free of bash-4 features: macOS ships bash 3.2.
 set -euo pipefail
 root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 target="$root/build/tools/testroms"
@@ -48,8 +53,48 @@ assembled() {
   ( cd "$dir" && nasm -f bin -o "$output" "$source" -l "${output%.*}.lst" -w-all )
 }
 
+# The Wonderful toolchain with its WonderSwan target, in build/tools/wonderful.
+wonderful() {
+  local dir="$root/build/tools/wonderful"
+  local system arch
+  system="$( uname -s | tr '[:upper:]' '[:lower:]' )"
+  arch="$( uname -m )"
+  [[ "$arch" == "arm64" ]] && arch="aarch64"
+  if [[ ! -x "$dir/bin/wf-pacman" ]]; then
+    mkdir -p "$dir"
+    curl -sSL --fail "https://wonderful.asie.pl/bootstrap/wf-bootstrap-$system-$arch.tar.gz" | tar xz -C "$dir"
+    if [[ "$system" == "darwin" ]]; then
+      codesign --remove-signature "$dir/bin/wf-pacman" && codesign -s - "$dir/bin/wf-pacman"
+    fi
+  fi
+  "$dir/bin/wf-pacman" -Syu --noconfirm --needed wf-tools target-wswan >/dev/null
+  local tool
+  for tool in "$dir"/bin/*; do
+    if head -1 "$tool" | grep -q '^#!/opt/wonderful/'; then
+      sed -i.orig "1s|^#!/opt/wonderful/|#!$dir/|" "$tool" && rm -f "$tool.orig"
+    fi
+  done
+}
+
+# ws-test-suite at a commit, built with the toolchain above.
+wstestsuite() {
+  local commit="$1"
+  local dir="$target/src/ws-test-suite"
+  local make=make
+  command -v gmake >/dev/null && make=gmake
+  if [[ ! -d "$dir/.git" ]]; then
+    git clone -q https://github.com/asiekierka/ws-test-suite.git "$dir"
+  fi
+  git -C "$dir" -c advice.detachedHead=false checkout -q "$commit"
+  # Its own warnings are its own; a failure still stops this script.
+  WONDERFUL_TOOLCHAIN="$root/build/tools/wonderful" PATH="$root/build/tools/wonderful/bin:$PATH" \
+    "$make" -C "$dir" -j4 >"$dir/build.log" 2>&1 || { cat "$dir/build.log" >&2; exit 1; }
+}
+
 release FluBBaOfWard/WSCPUTest v0.7.1 WSCpuTest.zip d15b36ac5a36c8a44c458e5e262a41585751494f67b3c42c223fb81effeb06a4
 assembled FluBBaOfWard/WSHWTest 34e33d5bfaaabb8b09fa5a557e409efe9fbfd979 WSHWTest.asm WSHWTest.wsc
 assembled FluBBaOfWard/WSTimingTest 025e606fc3b6615160ffdae485d992ffcad0c024 timingtest.asm timingtest.ws
+wonderful
+wstestsuite 7dfa0e2e869d08386b685d6a56df0bcfaf181b47
 
 echo "test ROMs in $target"

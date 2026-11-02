@@ -93,6 +93,7 @@ default: some 500,000 instructions, 48 bytes each.
 3. **The hardware test ROMs** (`scripts/fetch-test-roms.sh`): FluBBaOfWard's WSCpuTest, every
    instruction's results and flags; WSHWTest, the interrupt controller, the timers, the I/O
    registers, the noise and the sweep; WSTimingTest, every instruction's cycles against the
-   hardware's ([hardware/departures.md](hardware/departures.md)).
+   hardware's; asiekierka's ws-test-suite, the CPU's quirks and interrupt timing, the display,
+   the EEPROMs, the DMAs and the sound ([hardware/departures.md](hardware/departures.md)).
 4. **Transcripts and batch scripts:** scripted runs whose pictures, memory and sound are summed
    at checkpoints, to catch regressions.

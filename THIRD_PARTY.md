@@ -33,7 +33,9 @@ Used by the test suite alone, and not distributed: [Catch2](https://github.com/c
 (Boost Software License 1.0), and Fredrik Ahlström's (FluBBaOfWard) and Robert Peip's
 [WSCpuTest](https://github.com/FluBBaOfWard/WSCpuTest),
 [WSHWTest](https://github.com/FluBBaOfWard/WSHWTest) and
-[WSTimingTest](https://github.com/FluBBaOfWard/WSTimingTest), fetched or assembled by
+[WSTimingTest](https://github.com/FluBBaOfWard/WSTimingTest), and Adrian Siekierka's (asie)
+[ws-test-suite](https://github.com/asiekierka/ws-test-suite) (MIT), built with his
+[Wonderful toolchain](https://wonderful.asie.pl), all fetched, assembled or built by
 `scripts/fetch-test-roms.sh`.
 
 ## What is not here

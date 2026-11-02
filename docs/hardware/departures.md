@@ -18,6 +18,12 @@ the hardware it also restarts the count to the next step: WSHWTest's "Write rese
 writes the register once a line, sees the frequency never change. The port restarts both the
 prescaler and the period's count on that write.
 
+## Channel 4's LFSR runs in noise mode alone
+
+Mesen2 shifts the noise LFSR at each step of channel 4 whenever the channel is on. On the
+hardware it stays still with the channel on and noise mode off: ws-test-suite's
+`sound/quirks`, "LFSR tick on bit 3+7". The port shifts it only when both are on.
+
 ## The V30MZ's timing
 
 FluBBaOfWard's WSTimingTest measures each of 407 instructions and forms on the hardware (a
@@ -31,9 +37,10 @@ differ by 1 either way, as the hardware's do from run to run. Where the port dif
   as LEA addresses in that mode; Mesen2 read them from the register, and raised INT 5 where the
   hardware raises nothing.
 - **Kept as Mesen2 has them.**
-  - `IN AL, DX` and `IN AX, DX` read DX's port and take a cycle more than the hardware does
-    (78 against 74). Mesen2 adds the cycle on purpose, for asiekierka's `gdma_timing` test, which
-    is not run here yet.
+  - `IN AL, DX` and `IN AX, DX` read DX's port and take a cycle more than WSTimingTest finds
+    (78 against 74). Mesen2 adds the cycle on purpose: ws-test-suite's `dma/gdma_timing`, also
+    made on the hardware, passes with it and fails without, so the two tests disagree on where
+    the cycle falls, and the one that tests what a program sees is kept.
   - A single-register address after an instruction that changed its register costs the hardware
     a cycle more ("Adr EA04" after `ADD SI, 2`: 66 against 62); the port does not track which
     registers the instruction before changed.

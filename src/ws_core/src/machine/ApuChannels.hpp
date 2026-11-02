@@ -197,7 +197,11 @@ public:
       mState->timer = static_cast<std::uint16_t>( 2047 - mState->frequency );
       mState->samplePosition = static_cast<std::uint8_t>( ( mState->samplePosition + 1 ) & 0x1F );
 
-      if ( mState->lfsrEnabled )
+      // The LFSR runs in noise mode alone: ws-test-suite's sound/quirks
+      // ("LFSR tick on bit 3+7") finds it still with the channel on and
+      // noise off; Mesen2 runs it whenever the channel is on
+      // (docs/hardware/departures.md).
+      if ( mState->lfsrEnabled && mState->noiseEnabled )
       {
         auto const newBit = static_cast<std::uint16_t>(
             ( ( mState->lfsr >> 7U ) ^ ( mState->lfsr >> mState->tapShift ) ^ 0x01U ) & 0x01U );

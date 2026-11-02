@@ -85,6 +85,7 @@ TEST_CASE( "channel 4's LFSR shifts in the inverted XOR of bit 7 and its tap", "
   ApuCh4State state{};
   state.enabled = true;
   state.lfsrEnabled = true;
+  state.noiseEnabled = true;
   state.frequency = 2047;
   state.tapShift = 14;
   ApuCh4 channel{ nullptr, state };
@@ -101,6 +102,24 @@ TEST_CASE( "channel 4's LFSR shifts in the inverted XOR of bit 7 and its tap", "
   state.lfsr = 0x7FFF;
   channel.exec();
   REQUIRE( state.lfsr == 0x7FFF );
+}
+
+TEST_CASE( "channel 4's LFSR runs in noise mode alone", "[apu]" )
+{
+  // ws-test-suite's sound/quirks, "LFSR tick on bit 3+7", on the hardware.
+  ApuCh4State state{};
+  state.enabled = true;
+  state.lfsrEnabled = true;
+  state.frequency = 2047;
+  state.tapShift = 14;
+  ApuCh4 channel{ nullptr, state };
+
+  channel.exec();
+  REQUIRE( state.lfsr == 0 );
+
+  state.noiseEnabled = true;
+  channel.exec();
+  REQUIRE( state.lfsr == 1 );
 }
 
 TEST_CASE( "the HyperVoice scales its samples by its mode and shift", "[apu]" )
