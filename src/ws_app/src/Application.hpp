@@ -162,7 +162,6 @@ private:
   bool mShowInput{};
   bool mPaused{};
   std::int64_t mPicturesShown{ -1 };
-  bool mShowImguiDemo{};
   std::string mLastError;
   /// What the dialogs chose, waiting to be taken: they answer on threads of
   /// their own.

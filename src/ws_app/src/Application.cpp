@@ -573,11 +573,6 @@ void Application::drawInterface()
   mIo->draw( mShowIo );
   mHistory->draw( mShowHistory );
   drawSoundWindow();
-
-  if ( mShowImguiDemo )
-  {
-    ImGui::ShowDemoWindow( &mShowImguiDemo );
-  }
 }
 
 void Application::drawMenuBar()
@@ -639,8 +634,6 @@ void Application::drawMenuBar()
     ImGui::MenuItem( "Memory", nullptr, &mShowMemory );
     ImGui::MenuItem( "I/O", nullptr, &mShowIo );
     ImGui::MenuItem( "Sound", nullptr, &mShowSound );
-    ImGui::Separator();
-    ImGui::MenuItem( "ImGui demo", nullptr, &mShowImguiDemo );
     ImGui::EndMenu();
   }
   ImGui::EndMainMenuBar();
