@@ -38,6 +38,15 @@ cmake --preset release && cmake --build --preset release && ctest --preset relea
 CMake downloads every dependency at a pinned version when it first configures. So the first
 configure needs the network.
 
+The desktop application is built with SDL 3, which on Linux needs the development packages of the
+display, sound and input libraries; `.github/workflows/ci.yml` lists them for Ubuntu.
+`-DWS_BUILD_APP=OFF` builds without it.
+
+The tests that need ROMs skip without them. The cartridges and boot ROMs are looked for where
+`-DWS_TEST_ROM_DIR=` and `-DWS_TEST_BIOS_DIR=` say; the hardware test ROMs are put in
+`build/tools/testroms` by `scripts/fetch-test-roms.sh`, and run with
+`build/release/tests/ws_tests "[test-roms]"`.
+
 ### WebAssembly
 
 With [Emscripten](https://emscripten.org) installed:
@@ -85,7 +94,7 @@ There are two programs. Both print their options with `--help`.
 
 ```sh
 wsmcp
-wsmcp --bios-dir ~/Documents/WS/BIOS game.wsc
+wsmcp --bios-dir path/to/BIOS game.wsc
 wsmcp --server tcp:7701 --mcp-http 7702 game.wsc     # and serve it to other programs and agents
 ```
 
@@ -117,9 +126,9 @@ turned with the console.
 `wsmcp-cli` has no window. It runs only on request.
 
 ```sh
-wsmcp-cli --server tcp:7701 --bios-dir ~/Documents/WS/BIOS --save-dir saves game.wsc   # JSON lines on TCP
-wsmcp-cli --mcp --bios-dir ~/Documents/WS/BIOS                                          # MCP on stdio
-wsmcp-cli --batch tests/regression/boot.json --bios-dir ~/Documents/WS/BIOS             # check a batch script
+wsmcp-cli --server tcp:7701 --bios-dir path/to/BIOS --save-dir saves game.wsc   # JSON lines on TCP
+wsmcp-cli --mcp --bios-dir path/to/BIOS                                          # MCP on stdio
+wsmcp-cli --batch tests/regression/boot.json --bios-dir path/to/BIOS             # check a batch script
 ```
 
 - The cartridge is named after the options, or loaded later with `cart.load`.

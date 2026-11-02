@@ -12,6 +12,8 @@ compile_commands.json
 *.sav
 *.eeprom
 *.ieeprom
+*.rtc
+*.flash
 *.zip
 /roms/
 
