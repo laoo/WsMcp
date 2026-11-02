@@ -27,7 +27,11 @@ case "${1-}" in
 esac
 
 command -v emcmake >/dev/null || { echo "publish-site.sh: Emscripten is needed (brew install emscripten)" >&2; exit 1; }
-( cd "$root" && emcmake cmake --preset wasm >/dev/null && cmake --build --preset wasm >/dev/null )
+# Emscripten's CMake and the libraries it builds are chatty; what they say is
+# shown when the build fails.
+log="$root/build/publish-site.log"
+mkdir -p "$root/build"
+( cd "$root" && emcmake cmake --preset wasm && cmake --build --preset wasm ) >"$log" 2>&1 || { cat "$log" >&2; exit 1; }
 
 # Every file the page names is beside it: the scripts it imports, its
 # stylesheet, the worklet and the module's .wasm. The names are read from the
