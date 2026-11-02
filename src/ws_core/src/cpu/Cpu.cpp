@@ -256,8 +256,13 @@ void Cpu::setFlags( std::uint16_t flags )
 
 void Cpu::popMemory()
 {
-  idle();
   readModRmByte();
+  // A register takes a cycle less than memory, as WSTimingTest's "8F C0"
+  // finds on the hardware (docs/hardware/departures.md).
+  if ( mModRm.mode != 3 )
+  {
+    idle();
+  }
   std::uint16_t value = 0;
   pop( value );
   setModRm<std::uint16_t>( value );
@@ -323,6 +328,14 @@ void Cpu::readModRmByte()
   }
   else if ( mModRm.mode != 3 )
   {
+    // Two registers to add cost a second cycle, as WSTimingTest finds on the
+    // hardware ("Adr EA00" to "EA83", "MOV[2r],r" and the like), but for LEA,
+    // LDS, LES and POP r/m, which take one, as NEC's manual has it; Mesen2
+    // takes one for all (docs/hardware/departures.md).
+    if ( mModRm.rm <= 0x03 && mOpCode != 0x8D && mOpCode != 0xC4 && mOpCode != 0xC5 && mOpCode != 0x8F )
+    {
+      idle();
+    }
     switch ( mModRm.rm )
     {
     case 0x00:
@@ -614,6 +627,10 @@ void Cpu::bound()
   idle( 12 );
 
   readModRmByte();
+  // In mode 3 the bounds are in memory, addressed as LEA addresses it there:
+  // WSTimingTest's "62 C0" runs without an exception on the hardware
+  // (docs/hardware/departures.md).
+  ldsLesLeaModRm();
   auto const min = static_cast<std::int16_t>( getModRm<std::uint16_t>() );
   mModRm.offset = static_cast<std::uint16_t>( mModRm.offset + 2 );
   auto const max = static_cast<std::int16_t>( getModRm<std::uint16_t>() );

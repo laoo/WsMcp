@@ -30,7 +30,11 @@ linked into the programs:
 | [CLI11](https://github.com/CLIUtils/CLI11) | University of Cincinnati | BSD-3-Clause |
 
 Used by the test suite alone, and not distributed: [Catch2](https://github.com/catchorg/Catch2)
-(Boost Software License 1.0).
+(Boost Software License 1.0), and Fredrik Ahlström's (FluBBaOfWard) and Robert Peip's
+[WSCpuTest](https://github.com/FluBBaOfWard/WSCpuTest),
+[WSHWTest](https://github.com/FluBBaOfWard/WSHWTest) and
+[WSTimingTest](https://github.com/FluBBaOfWard/WSTimingTest), fetched or assembled by
+`scripts/fetch-test-roms.sh`.
 
 ## What is not here
 

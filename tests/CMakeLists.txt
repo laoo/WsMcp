@@ -5,6 +5,7 @@ add_executable( ws_tests
   machine/ApuTest.cpp
   machine/MachineTest.cpp
   machine/PpuTest.cpp
+  machine/TestRomsTest.cpp
   server/JsonLinesServerTest.cpp
   server/McpServerTest.cpp
   server/NetworkServersTest.cpp
@@ -27,6 +28,11 @@ set( WS_TEST_ROM_DIR "$ENV{HOME}/Documents/WS/ROM" CACHE PATH "The cartridges th
 target_compile_definitions( ws_tests
   PRIVATE WS_TEST_BIOS_DIR="${WS_TEST_BIOS_DIR}"
           WS_TEST_ROM_DIR="${WS_TEST_ROM_DIR}" )
+
+# Where the [test-roms] tests find the hardware test ROMs
+# scripts/fetch-test-roms.sh puts there; they skip without them.
+target_compile_definitions( ws_tests
+  PRIVATE WS_TEST_ROM_TOOLS_DIR="${CMAKE_SOURCE_DIR}/build/tools/testroms" )
 
 target_link_libraries( ws_tests
   PRIVATE ws::server Catch2::Catch2WithMain ws::warnings httplib )

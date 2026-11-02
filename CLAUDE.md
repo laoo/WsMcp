@@ -26,6 +26,14 @@ ctest --preset debug -L regression                  # the batch scripts, tests/r
 ```
 
 ```sh
+./scripts/fetch-test-roms.sh                        # the hardware test ROMs, into build/tools/testroms (brew install nasm)
+build/release/tests/ws_tests "[test-roms]"          # them all: WSHWTest, WSTimingTest, and WSCpuTest, about 9 minutes
+```
+
+The [test-roms] tests skip without the test ROMs or the boot ROMs; WSCpuTest's,
+tagged [cpu-test] as well, is hidden from the default run.
+
+```sh
 ./scripts/format.sh          # format in place
 ./scripts/format.sh --check  # fail on deviation
 ./scripts/tidy.sh            # clang-tidy against build/debug

@@ -90,5 +90,9 @@ default: some 500,000 instructions, 48 bytes each.
    disassembler.
 2. **Machine tests** with the owner's public-domain cartridges and boot ROMs (`~/Documents/WS`):
    frame timing, the IPL's hand-over, breakpoints, save states.
-3. **Transcripts and batch scripts:** scripted runs whose pictures, memory and sound are summed
+3. **The hardware test ROMs** (`scripts/fetch-test-roms.sh`): FluBBaOfWard's WSCpuTest, every
+   instruction's results and flags; WSHWTest, the interrupt controller, the timers, the I/O
+   registers, the noise and the sweep; WSTimingTest, every instruction's cycles against the
+   hardware's ([hardware/departures.md](hardware/departures.md)).
+4. **Transcripts and batch scripts:** scripted runs whose pictures, memory and sound are summed
    at checkpoints, to catch regressions.

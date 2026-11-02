@@ -441,6 +441,11 @@ void Apu::write( std::uint16_t port, std::uint8_t value )
     break;
   case 0x8D:
     mState.ch3.sweepPeriod = value & 0x1FU;
+    // A write restarts the sweep's count, as WSHWTest's "Write resets Timer"
+    // finds on the hardware; Mesen2 lets it run on
+    // (docs/hardware/departures.md).
+    mState.ch3.sweepScaler = 0;
+    mState.ch3.sweepTimer = mState.ch3.sweepPeriod;
     break;
 
   case 0x8E:
