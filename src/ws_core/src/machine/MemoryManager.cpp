@@ -7,6 +7,8 @@
 #include "Serial.hpp"
 #include "Timer.hpp"
 
+#include <algorithm>
+
 namespace ws::machine
 {
 
@@ -144,6 +146,23 @@ T MemoryManager::debugCpuRead( std::uint16_t seg, std::uint16_t offset ) const
   else
   {
     return debugRead( addr );
+  }
+}
+
+void MemoryManager::debugCpuRead( std::uint16_t seg, std::uint16_t offset, std::span<std::uint8_t> out ) const
+{
+  // The history of execution reads every instruction's bytes this way, so
+  // the common case, all of them in one mapped page, is a copy.
+  std::uint32_t const addr = ( ( static_cast<std::uint32_t>( seg ) << 4U ) + offset ) & 0xFFFFFU;
+  std::uint8_t const* handler = mReads[( addr >> 12U ) & 0xFFU];
+  if ( handler != nullptr && offset + out.size() <= 0x10000U && ( addr & 0xFFFU ) + out.size() <= 0x1000U )
+  {
+    std::copy_n( handler + ( addr & 0xFFFU ), out.size(), out.begin() );
+    return;
+  }
+  for ( std::size_t i = 0; i < out.size(); i++ )
+  {
+    out[i] = debugCpuRead<std::uint8_t>( seg, static_cast<std::uint16_t>( offset + i ) );
   }
 }
 

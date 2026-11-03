@@ -19,6 +19,24 @@ set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 option( WS_BUILD_TESTS "Build the test suite"                     ON )
 option( WS_BUILD_APP   "Build the SDL3 desktop application"       ON )
 option( WS_WERROR      "Treat compiler warnings as errors"        OFF )
+option( WS_LTO         "Optimise across files in optimised builds" ON )
+
+# The machine is stepped a cycle at a time through calls between its parts,
+# each in a file of its own: optimised across files, it runs about a third
+# faster. Debug builds are left alone, for the debugger and for build times.
+if( WS_LTO )
+  include( CheckIPOSupported )
+  check_ipo_supported( RESULT WS_LTO_SUPPORTED OUTPUT WS_LTO_ERROR LANGUAGES CXX )
+  if( WS_LTO_SUPPORTED )
+    # Fetched dependencies that ask for an older CMake would otherwise ignore it.
+    set( CMAKE_POLICY_DEFAULT_CMP0069 NEW )
+    foreach( config RELEASE RELWITHDEBINFO MINSIZEREL )
+      set( CMAKE_INTERPROCEDURAL_OPTIMIZATION_${config} ON )
+    endforeach( )
+  else( )
+    message( STATUS "WsMcp: no optimisation across files: ${WS_LTO_ERROR}" )
+  endif( )
+endif( )
 
 include( Warnings )
 include( Dependencies )

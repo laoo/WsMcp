@@ -1,5 +1,7 @@
 #include "TraceHistory.hpp"
 
+#include <algorithm>
+
 namespace ws::machine
 {
 
@@ -16,16 +18,25 @@ void TraceHistory::push( TracedInstruction const& instruction )
 
 void TraceHistory::forgetBefore( std::uint64_t cutoff )
 {
-  while ( mSize > 0 && at( 0 ).cycle < cutoff )
+  // The instructions are kept in the order they began, so the first block's
+  // are searched for the cutoff rather than let go one by one.
+  while ( mSize > 0 )
   {
-    ++mFirst;
-    --mSize;
-    if ( mFirst == BLOCK )
+    Block const& first = *mBlocks.front();
+    auto const begin = first.begin() + static_cast<std::ptrdiff_t>( mFirst );
+    auto const end = first.begin() + static_cast<std::ptrdiff_t>( std::min( BLOCK, mFirst + mSize ) );
+    auto const kept = std::partition_point(
+        begin, end, [cutoff]( TracedInstruction const& instruction ) { return instruction.cycle < cutoff; } );
+    auto const forgotten = static_cast<std::size_t>( kept - begin );
+    mFirst += forgotten;
+    mSize -= forgotten;
+    if ( mFirst != BLOCK )
     {
-      mSpare = std::move( mBlocks.front() );
-      mBlocks.pop_front();
-      mFirst = 0;
+      return;
     }
+    mSpare = std::move( mBlocks.front() );
+    mBlocks.pop_front();
+    mFirst = 0;
   }
 }
 

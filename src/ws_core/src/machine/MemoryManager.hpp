@@ -17,6 +17,7 @@
 
 #include <array>
 #include <cstdint>
+#include <span>
 #include <type_traits>
 
 namespace ws::machine
@@ -90,6 +91,9 @@ public:
 
   template <typename T>
   [[nodiscard]] T debugCpuRead( std::uint16_t seg, std::uint16_t offset ) const;
+  /// `out.size()` bytes from `seg:offset` on, the offset wrapping in the
+  /// segment, as debugCpuRead reads each.
+  void debugCpuRead( std::uint16_t seg, std::uint16_t offset, std::span<std::uint8_t> out ) const;
 
   template <typename T>
   T read( std::uint16_t seg, std::uint16_t offset, MemoryOperationType opType = MemoryOperationType::READ )

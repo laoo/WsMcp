@@ -45,6 +45,9 @@ The desktop application is built with SDL 3, which on Linux needs the developmen
 display, sound and input libraries; `.github/workflows/ci.yml` lists them for Ubuntu.
 `-DWS_BUILD_APP=OFF` builds without it.
 
+The optimised presets optimise across files, which makes the emulator about a third faster and
+its links slower; `-DWS_LTO=OFF` turns it off.
+
 The tests that need ROMs skip without them. The cartridges and boot ROMs are looked for where
 `-DWS_TEST_ROM_DIR=` and `-DWS_TEST_BIOS_DIR=` say; the hardware test ROMs are put in
 `build/tools/testroms` by `scripts/fetch-test-roms.sh`, and run with

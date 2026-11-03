@@ -122,8 +122,8 @@ struct Machine::Impl final : SystemListener, BusObserver
   {
     pictureWidth = width;
     pictureHeight = height;
-    picture.resize( static_cast<std::size_t>( width ) * height * 4 );
-    toRgba( pixels.first( static_cast<std::size_t>( width ) * height ), system->getModel(), picture );
+    // Converted when asked for: a run of many frames asks for the last.
+    drawn.assign( pixels.begin(), pixels.begin() + static_cast<std::ptrdiff_t>( width ) * height );
     ++frames;
     trace.forgetBefore( now() > traceCycles ? now() - traceCycles : 0 );
   }
@@ -194,11 +194,7 @@ struct Machine::Impl final : SystemListener, BusObserver
                                    .es = state.es,
                                    .ss = state.ss,
                                    .flags = state.flags.get() };
-    MemoryManager const& memory = *system->getMemoryManager();
-    for ( std::size_t i = 0; i < instruction.bytes.size(); i++ )
-    {
-      instruction.bytes[i] = memory.debugCpuRead<std::uint8_t>( state.cs, static_cast<std::uint16_t>( state.ip + i ) );
-    }
+    system->getMemoryManager()->debugCpuRead( state.cs, state.ip, instruction.bytes );
     trace.push( instruction );
   }
 
@@ -326,6 +322,10 @@ struct Machine::Impl final : SystemListener, BusObserver
   std::uint16_t buttons{};
   std::uint16_t hostButtons{};
 
+  /// The last complete picture as the PPU drew it, and as RGBA when
+  /// picture() has converted it.
+  std::vector<std::uint16_t> drawn;
+  std::uint64_t converted{};
   std::vector<std::uint8_t> picture;
   std::uint32_t pictureWidth{};
   std::uint32_t pictureHeight{};
@@ -614,7 +614,14 @@ void Machine::setHostButtons( std::uint16_t buttons )
 
 std::span<std::uint8_t const> Machine::picture() const
 {
-  return mImpl->picture;
+  Impl& impl = *mImpl;
+  if ( impl.converted != impl.frames )
+  {
+    impl.picture.resize( impl.drawn.size() * 4 );
+    toRgba( impl.drawn, impl.system->getModel(), impl.picture );
+    impl.converted = impl.frames;
+  }
+  return impl.picture;
 }
 
 std::uint32_t Machine::pictureWidth() const
